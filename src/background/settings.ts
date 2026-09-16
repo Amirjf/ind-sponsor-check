@@ -28,8 +28,10 @@ export async function fetchRemoteSettings(): Promise<RemoteSettings> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?select=key,value`, {
     headers: {
       apikey: SUPABASE_ANON_KEY!,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       Accept: 'application/json',
+      // Legacy anon keys are JWTs and go in Authorization too; the newer
+      // `sb_publishable_...` keys are not JWTs and must only be sent as apikey.
+      ...(SUPABASE_ANON_KEY!.startsWith('eyJ') ? { Authorization: `Bearer ${SUPABASE_ANON_KEY}` } : {}),
     },
   })
   if (!res.ok) throw new Error(`Supabase settings request failed: ${res.status}`)

@@ -20,7 +20,10 @@ create policy "anon can read settings"
 
 -- keep updated_at fresh
 create or replace function public.settings_touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;

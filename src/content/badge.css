@@ -1,43 +1,89 @@
-.indsc-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  margin-left: 0.5em;
-  padding: 0.15em 0.6em;
-  border-radius: 999px;
-  font: 600 12px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  vertical-align: middle;
-  white-space: nowrap;
+/* Host pages (LinkedIn, Indeed) style anchors aggressively, including in dark
+   mode, so every visual property is pinned with !important and the badge uses
+   solid fills that stay readable on any background. */
+.indsc-badge,
+.indsc-badge:link,
+.indsc-badge:visited,
+.indsc-badge:hover,
+.indsc-badge:active,
+.indsc-badge:focus {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4em !important;
+  margin: 0 0 0 0.6em !important;
+  padding: 0.25em 0.75em !important;
+  border-radius: 999px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.01em !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
   text-decoration: none !important;
-  border: 1px solid transparent;
-  cursor: pointer;
+  text-transform: none !important;
+  border: 2px solid transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  color: #fff !important;
+  background: #555 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 .indsc-badge:hover {
-  filter: brightness(0.95);
-  text-decoration: none !important;
+  filter: brightness(1.08) !important;
 }
-.indsc-badge--checking {
-  color: #555;
-  background: #f0f0f0;
-  border-color: #ddd;
+.indsc-badge:focus-visible {
+  outline: 3px solid #1a73e8 !important;
+  outline-offset: 2px !important;
 }
-.indsc-badge--sponsor {
-  color: #0b5d2e;
-  background: #dff5e6;
-  border-color: #9ed9b2;
+
+/* checking… */
+.indsc-badge--checking,
+.indsc-badge--checking:link,
+.indsc-badge--checking:visited {
+  color: #fff !important;
+  background: #6b7280 !important;
+  cursor: default !important;
 }
-.indsc-badge--likely {
-  color: #6b4d00;
-  background: #fff3cd;
-  border-color: #ffd97a;
+
+/* ✓ recognised sponsor: white on strong green */
+.indsc-badge--sponsor,
+.indsc-badge--sponsor:link,
+.indsc-badge--sponsor:visited,
+.indsc-badge--sponsor:hover {
+  color: #fff !important;
+  background: #0d7b35 !important;
+  border-color: #0b6b2e !important;
 }
-.indsc-badge--none {
-  color: #6b1d1d;
-  background: #fde8e8;
-  border-color: #f3b4b4;
+
+/* ≈ likely: near-black on amber */
+.indsc-badge--likely,
+.indsc-badge--likely:link,
+.indsc-badge--likely:visited,
+.indsc-badge--likely:hover {
+  color: #1f1400 !important;
+  background: #ffc107 !important;
+  border-color: #d39e00 !important;
 }
-.indsc-badge--error {
-  color: #444;
-  background: #eee;
-  border-color: #ccc;
+
+/* ✕ not found: white on red */
+.indsc-badge--none,
+.indsc-badge--none:link,
+.indsc-badge--none:visited,
+.indsc-badge--none:hover {
+  color: #fff !important;
+  background: #d32f2f !important;
+  border-color: #a52626 !important;
+}
+
+/* ! error: white on dark grey */
+.indsc-badge--error,
+.indsc-badge--error:link,
+.indsc-badge--error:visited {
+  color: #fff !important;
+  background: #374151 !important;
+  cursor: default !important;
 }
