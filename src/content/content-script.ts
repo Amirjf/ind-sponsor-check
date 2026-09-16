@@ -1,6 +1,6 @@
 import './badge.css'
 import type { CheckResponse, Message } from '../shared/types'
-import { BADGE_CLASS, FLOAT_CLASS, createBadge, createFloatingContainer, renderError, renderResult } from './badge'
+import { BADGE_CLASS, FLOAT_CLASS, createBadge, createFloatingContainer, disposeBadge, renderError, renderResult } from './badge'
 import { getAdapter, type CompanyTarget } from './sites'
 
 const DEBOUNCE_MS = 250
@@ -24,8 +24,10 @@ function sendMessage<T>(message: Message): Promise<T> {
 let dismissedName: string | null = null
 
 function removeStaleBadges(keep?: Element | null) {
-  for (const badge of document.querySelectorAll(`.${BADGE_CLASS}`)) {
-    if (badge !== keep) badge.remove()
+  for (const badge of document.querySelectorAll<HTMLElement>(`.${BADGE_CLASS}`)) {
+    if (badge === keep) continue
+    disposeBadge(badge)
+    badge.remove()
   }
   for (const box of document.querySelectorAll(`.${FLOAT_CLASS}`)) {
     if (!keep || !box.contains(keep)) box.remove()
