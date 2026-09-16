@@ -1,14 +1,15 @@
 # IND Sponsor Check for LinkedIn
 
 Chrome extension (Manifest V3, React + Vite + [CRXJS](https://crxjs.dev)) that
-adds a badge next to the company name on every LinkedIn job page telling you
-whether that company is in the IND
+adds a badge next to the company name on LinkedIn and Indeed job pages and
+company pages telling you whether that company is in the IND
 [public register of recognised sponsors](https://ind.nl/en/public-register-recognised-sponsors/public-register-work).
 
 ```
 src/
   background/   service worker: downloads + caches the register, answers lookups
-  content/      LinkedIn content script: finds the company name, injects the badge
+  content/      content script: finds the company name, injects the badge
+  content/sites/  one adapter per job site (linkedin.ts, indeed.ts): URLs + selectors
   popup/        React popup: manual lookup, list status, refresh button
   shared/       pure logic (name normalisation, matching, HTML parsing) — unit tested
   data/         bundled snapshot of the register (offline / first-run fallback)
@@ -23,8 +24,12 @@ scripts/        icon generator, snapshot updater, zip for upload
    reads the settings table from Supabase, downloads the page at `register_url`,
    parses the Organisation / KVK table and stores it in `chrome.storage.local`.
    Until the first download succeeds it uses the bundled snapshot in `src/data`.
-2. The content script watches the LinkedIn DOM (it is a single-page app), finds
-   the company name on the open job, and asks the service worker for a match.
+2. The content script watches the page DOM (both sites are single-page apps),
+   finds the company name on the open job or company profile, and asks the
+   service worker for a match. Supported pages:
+   - LinkedIn: `/jobs/...` (detail pane or full page) and `/company/<slug>`
+   - Indeed (any country subdomain): `/jobs?...&vjk=` detail pane, `/viewjob`,
+     and `/cmp/<slug>`
 3. Matching normalises both names (lowercase, strip accents/punctuation, drop
    legal forms like `B.V.`, `N.V.`, `Holding`, `Netherlands`, `Koninklijke`...):
    - identical → **✓ recognised sponsor**
@@ -100,11 +105,14 @@ new domain to `host_permissions` in `manifest.config.ts` and release an update.
   this project.
 - `src/data/sponsors-snapshot.json` is public data from the IND register.
 
-## When LinkedIn changes its markup
+## When a site changes its markup, or to add a site
 
-All LinkedIn-specific selectors live in `src/content/linkedin.ts`
-(`COMPANY_SELECTORS`). Add the new selector to the top of the list and run
-`npm test`.
+Each site is one file in `src/content/sites/` implementing `SiteAdapter`
+(URL → page kind, DOM → company name element). Add the new selector to the top
+of the relevant list, or add a new adapter and register it in
+`src/content/sites/index.ts` plus `matches` in `manifest.config.ts`. Run
+`npm test`; the adapter tests use small HTML fixtures copied from the live
+pages.
 
 ## Contributing
 

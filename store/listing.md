@@ -1,10 +1,10 @@
 # Chrome Web Store listing
 
 ## Name
-IND Sponsor Check for LinkedIn
+IND Sponsor Check for LinkedIn & Indeed
 
 ## Summary (132 chars max)
-Shows on every LinkedIn job whether the company is an IND recognised sponsor for highly skilled migrants in the Netherlands.
+Shows on LinkedIn and Indeed jobs and company pages whether the company is an IND recognised sponsor.
 
 ## Category
 Productivity
@@ -15,7 +15,7 @@ are "recognised sponsors" with the IND (Immigration and Naturalisation Service)
 can sponsor a highly skilled migrant visa.
 
 This extension adds a small badge next to the company name on every LinkedIn
-job you open:
+or Indeed job you open and on every company profile page:
 
 - ✓ green: the company is in the IND public register of recognised sponsors
 - ≈ yellow: a company with a very similar name is in the register (check the tooltip)
@@ -32,18 +32,21 @@ The extension does not collect, store or transmit any personal data. It only
 reads the company name on the LinkedIn job page you are viewing, and compares
 it locally against the register.
 
-Not affiliated with IND or LinkedIn.
+Not affiliated with IND, LinkedIn or Indeed.
 
 ## Single purpose (reviewer field)
-Display whether the employer of the LinkedIn job page the user is viewing is
-listed in the IND public register of recognised sponsors.
+Display whether the company shown on the LinkedIn or Indeed job or company
+page the user is viewing is listed in the IND public register of recognised
+sponsors.
 
 ## Permission justifications (reviewer field)
 - `storage`: cache the downloaded sponsor list and settings locally.
 - `alarms`: refresh the sponsor list once a day in the background.
-- Host `https://www.linkedin.com/*`: content script that reads the company
-  name on job pages and inserts the badge. LinkedIn is a single-page app, so
-  the script must be registered site-wide even though it only acts on /jobs/.
+- Host `https://www.linkedin.com/*` and `https://*.indeed.com/*`: content
+  script that reads the company name on job and company pages and inserts the
+  badge. Both are single-page apps, so the script must be registered site-wide
+  even though it only acts on job and company URLs. Indeed uses a subdomain
+  per country (nl.indeed.com, www.indeed.com, ...).
 - Host `https://ind.nl/*`: download the public sponsor register.
 - Host `https://*.supabase.co/*`: read a small remote configuration table
   (the register URL and refresh interval) so the extension can be repaired

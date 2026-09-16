@@ -1,8 +1,8 @@
 {
   "name": "ind-sponsor-check",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Shows whether the company behind a LinkedIn job is an IND recognised sponsor (Netherlands).",
+  "description": "Shows whether a company on LinkedIn or Indeed (job or company page) is an IND recognised sponsor (Netherlands).",
   "type": "module",
   "scripts": {
     "dev": "vite",
