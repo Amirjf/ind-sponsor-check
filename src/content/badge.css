@@ -134,3 +134,99 @@
   background: rgba(0, 0, 0, 0.08) !important;
   color: #111 !important;
 }
+
+/* ≈ likely: the badge is a toggle and hosts the dropdown, so it may overflow. */
+.indsc-badge--likely,
+.indsc-badge--likely:link,
+.indsc-badge--likely:visited,
+.indsc-badge--likely:hover {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Dropdown listing the similar register entries. Solid colours so LinkedIn
+   and Indeed dark modes cannot bleed through. */
+.indsc-menu {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  left: 0 !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 280px !important;
+  max-width: min(380px, calc(100vw - 32px)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  letter-spacing: normal !important;
+  text-align: left !important;
+  white-space: normal !important;
+  cursor: default !important;
+}
+.indsc-menu[hidden] {
+  display: none !important;
+}
+.indsc-menu--up {
+  top: auto !important;
+  bottom: calc(100% + 6px) !important;
+  left: auto !important;
+  right: 0 !important;
+}
+.indsc-menu__heading {
+  padding: 10px 12px 6px !important;
+  font-weight: 600 !important;
+  color: #444 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+.indsc-menu__list {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 4px 0 !important;
+  /* about five rows, then scroll */
+  max-height: 215px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+.indsc-menu__item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: baseline !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 7px 12px !important;
+  color: #111 !important;
+}
+.indsc-menu__item:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+.indsc-menu__name {
+  font-weight: 500 !important;
+  color: #111 !important;
+}
+.indsc-menu__kvk {
+  flex-shrink: 0 !important;
+  font-size: 12px !important;
+  color: #666 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.indsc-menu__footer,
+.indsc-menu__footer:link,
+.indsc-menu__footer:visited {
+  display: block !important;
+  padding: 8px 12px 10px !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1a5cb8 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+.indsc-menu__footer:hover {
+  text-decoration: underline !important;
+}

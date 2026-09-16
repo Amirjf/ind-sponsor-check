@@ -20,7 +20,7 @@ website it shows a small floating badge (bottom-right) on the homepage when the
 site publishes its organisation name as structured data (schema.org JSON-LD):
 
 - ✓ green: the company is in the IND public register of recognised sponsors
-- ≈ yellow: a company with a very similar name is in the register (check the tooltip)
+- ≈ yellow: companies with a similar name are in the register (click the badge to see the list)
 - ✕ red: no matching name was found
 
 Click the badge to open the official IND register. The list is downloaded from

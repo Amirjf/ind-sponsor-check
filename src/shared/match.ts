@@ -32,7 +32,7 @@ function push<K, V>(map: Map<K, V[]>, key: K, value: V) {
   else map.set(key, [value])
 }
 
-const MAX_LIKELY = 5
+const MAX_LIKELY = 25
 /** Prefix matching on very short cores ("ab") would be noise. */
 const MIN_PREFIX_LENGTH = 3
 

@@ -57,3 +57,12 @@ describe('matchCompany', () => {
     expect(matchCompany('   ', index).status).toBe('none')
   })
 })
+
+describe('likely cap', () => {
+  it('returns up to 25 prefix matches', () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({ name: `Acme Unit ${i} B.V.`, kvk: String(i) }))
+    const r = matchCompany('Acme', buildIndex(many))
+    expect(r.status).toBe('likely')
+    expect(r.matches).toHaveLength(25)
+  })
+})
