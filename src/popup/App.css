@@ -1,0 +1,65 @@
+:root {
+  color-scheme: light dark;
+  --fg: #1a1a1a;
+  --muted: #666;
+  --bg: #fff;
+  --card: #f6f7f9;
+  --border: #e2e5ea;
+  --accent: #0a66c2;
+  --ok: #0b5d2e;
+  --ok-bg: #dff5e6;
+  --warn: #6b4d00;
+  --warn-bg: #fff3cd;
+  --bad: #6b1d1d;
+  --bad-bg: #fde8e8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #eee;
+    --muted: #aaa;
+    --bg: #1e1e1e;
+    --card: #2a2a2a;
+    --border: #3a3a3a;
+    --accent: #6cb4ff;
+    --ok: #9ed9b2;
+    --ok-bg: #16351f;
+    --warn: #ffd97a;
+    --warn-bg: #3d2f00;
+    --bad: #f3b4b4;
+    --bad-bg: #3d1616;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  width: 340px;
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+.app { padding: 14px; display: grid; gap: 12px; }
+h1 { font-size: 15px; margin: 0; }
+.sub { color: var(--muted); margin: 2px 0 0; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.row { display: flex; justify-content: space-between; gap: 8px; }
+.row + .row { margin-top: 4px; }
+.label { color: var(--muted); }
+.error { color: var(--bad); }
+.actions { display: flex; gap: 8px; align-items: center; }
+button {
+  font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: 0.6; cursor: default; }
+input {
+  font: inherit; width: 100%; padding: 7px 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+}
+.result { margin-top: 8px; padding: 8px 10px; border-radius: 6px; }
+.result--sponsor { background: var(--ok-bg); color: var(--ok); }
+.result--likely { background: var(--warn-bg); color: var(--warn); }
+.result--none { background: var(--bad-bg); color: var(--bad); }
+.result ul { margin: 6px 0 0; padding-left: 18px; }
+a { color: var(--accent); }
+.foot { color: var(--muted); font-size: 12px; }

@@ -1,0 +1,43 @@
+.indsc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-left: 0.5em;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font: 600 12px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-decoration: none !important;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.indsc-badge:hover {
+  filter: brightness(0.95);
+  text-decoration: none !important;
+}
+.indsc-badge--checking {
+  color: #555;
+  background: #f0f0f0;
+  border-color: #ddd;
+}
+.indsc-badge--sponsor {
+  color: #0b5d2e;
+  background: #dff5e6;
+  border-color: #9ed9b2;
+}
+.indsc-badge--likely {
+  color: #6b4d00;
+  background: #fff3cd;
+  border-color: #ffd97a;
+}
+.indsc-badge--none {
+  color: #6b1d1d;
+  background: #fde8e8;
+  border-color: #f3b4b4;
+}
+.indsc-badge--error {
+  color: #444;
+  background: #eee;
+  border-color: #ccc;
+}
