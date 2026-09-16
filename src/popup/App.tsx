@@ -54,7 +54,7 @@ export default function App() {
     <div className="app">
       <header>
         <h1>IND Sponsor Check</h1>
-        <p className="sub">Open a LinkedIn job to see a badge next to the company name.</p>
+        <p className="sub">Open a LinkedIn or Indeed job, or a company website, to see the badge.</p>
       </header>
 
       <section className="card">

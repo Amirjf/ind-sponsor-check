@@ -30,8 +30,8 @@ describe('adapter registry', () => {
     ['nl.indeed.com', 'indeed'],
     ['www.indeed.com', 'indeed'],
     ['www.linkedin.com', 'linkedin'],
-    ['indeed.com.evil.example', null],
-    ['example.com', null],
+    ['indeed.com.evil.example', 'website'],
+    ['example.com', 'website'],
   ])('%s -> %s', (host, id) => {
     expect(getAdapter(host)?.id ?? null).toBe(id)
   })

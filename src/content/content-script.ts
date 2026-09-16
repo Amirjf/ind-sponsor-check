@@ -1,6 +1,6 @@
 import './badge.css'
 import type { CheckResponse, Message } from '../shared/types'
-import { BADGE_CLASS, createBadge, renderError, renderResult } from './badge'
+import { BADGE_CLASS, FLOAT_CLASS, createBadge, createFloatingContainer, renderError, renderResult } from './badge'
 import { getAdapter, type CompanyTarget } from './sites'
 
 const DEBOUNCE_MS = 250
@@ -20,21 +20,48 @@ function sendMessage<T>(message: Message): Promise<T> {
   })
 }
 
+/** Company name whose floating badge the user closed on this page load. */
+let dismissedName: string | null = null
+
 function removeStaleBadges(keep?: Element | null) {
   for (const badge of document.querySelectorAll(`.${BADGE_CLASS}`)) {
     if (badge !== keep) badge.remove()
+  }
+  for (const box of document.querySelectorAll(`.${FLOAT_CLASS}`)) {
+    if (!keep || !box.contains(keep)) box.remove()
   }
 }
 
 /** The badge already attached to this target, if any. */
 function attachedBadge({ element, placement }: CompanyTarget): HTMLElement | null {
-  const candidate = placement === 'inside' ? element.querySelector(`:scope > .${BADGE_CLASS}`) : element.nextElementSibling
+  const candidate =
+    placement === 'floating'
+      ? document.querySelector(`.${FLOAT_CLASS} .${BADGE_CLASS}`)
+      : placement === 'inside'
+        ? element.querySelector(`:scope > .${BADGE_CLASS}`)
+        : element.nextElementSibling
   return candidate instanceof HTMLElement && candidate.classList.contains(BADGE_CLASS) ? candidate : null
 }
 
-function attachBadge({ element, placement }: CompanyTarget, badge: HTMLElement) {
-  if (placement === 'inside') element.appendChild(badge)
-  else element.insertAdjacentElement('afterend', badge)
+function attachBadge({ element, name, placement }: CompanyTarget, badge: HTMLElement) {
+  if (placement === 'floating') {
+    element.appendChild(createFloatingContainer(name, badge, () => (dismissedName = name)))
+  } else if (placement === 'inside') {
+    element.appendChild(badge)
+  } else {
+    element.insertAdjacentElement('afterend', badge)
+  }
+}
+
+/** Looks up each candidate name in turn; a definite hit wins, then a likely one, else the first answer. */
+async function lookup(names: readonly string[]): Promise<CheckResponse> {
+  let best: CheckResponse | null = null
+  for (const name of names) {
+    const result = await sendMessage<CheckResponse>({ type: 'CHECK_COMPANY', name })
+    if (result.status === 'sponsor') return result
+    if (!best || (result.status === 'likely' && best.status === 'none')) best = result
+  }
+  return best!
 }
 
 async function scan() {
@@ -45,6 +72,7 @@ async function scan() {
   }
   const target = site.findCompanyTarget(document, kind)
   if (!target) return
+  if (target.placement === 'floating' && target.name === dismissedName) return
 
   const existing = attachedBadge(target)
   if (existing && existing.dataset.company === target.name) {
@@ -57,7 +85,7 @@ async function scan() {
   attachBadge(target, badge)
 
   try {
-    const result = await sendMessage<CheckResponse>({ type: 'CHECK_COMPANY', name: target.name })
+    const result = await lookup(target.candidates?.length ? target.candidates : [target.name])
     renderResult(badge, result)
   } catch (err) {
     renderError(badge, err instanceof Error ? err.message : String(err))

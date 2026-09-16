@@ -3,7 +3,7 @@ import pkg from './package.json' with { type: 'json' }
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'IND Sponsor Check for LinkedIn & Indeed',
+  name: 'IND Sponsor Check',
   version: pkg.version,
   description: pkg.description,
   icons: {
@@ -28,10 +28,13 @@ export default defineManifest({
   },
   content_scripts: [
     {
-      // These sites are single-page apps: a user can land on the home page and
-      // navigate to a job without a reload, so the script must be present
-      // site-wide. It does nothing unless the URL is a job or company page.
-      matches: ['https://www.linkedin.com/*', 'https://*.indeed.com/*'],
+      // LinkedIn and Indeed get dedicated adapters (job + company pages). Every
+      // other site is treated as a possible company website: the script reads
+      // the page's schema.org JSON-LD and only shows a badge when it names an
+      // organisation. Job sites are single-page apps, so the script must be
+      // present site-wide rather than only on job URLs.
+      matches: ['https://*/*', 'http://*/*'],
+      exclude_matches: ['https://ind.nl/*'],
       js: ['src/content/content-script.ts'],
       run_at: 'document_idle',
     },

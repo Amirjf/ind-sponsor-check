@@ -1,15 +1,16 @@
-# IND Sponsor Check for LinkedIn
+# IND Sponsor Check
 
 Chrome extension (Manifest V3, React + Vite + [CRXJS](https://crxjs.dev)) that
 adds a badge next to the company name on LinkedIn and Indeed job pages and
-company pages telling you whether that company is in the IND
+company pages, and a floating badge on company websites, telling you whether
+that company is in the IND
 [public register of recognised sponsors](https://ind.nl/en/public-register-recognised-sponsors/public-register-work).
 
 ```
 src/
   background/   service worker: downloads + caches the register, answers lookups
   content/      content script: finds the company name, injects the badge
-  content/sites/  one adapter per job site (linkedin.ts, indeed.ts): URLs + selectors
+  content/sites/  one adapter per job site (linkedin.ts, indeed.ts) + website.ts (JSON-LD)
   popup/        React popup: manual lookup, list status, refresh button
   shared/       pure logic (name normalisation, matching, HTML parsing) — unit tested
   data/         bundled snapshot of the register (offline / first-run fallback)
@@ -30,6 +31,12 @@ scripts/        icon generator, snapshot updater, zip for upload
    - LinkedIn: `/jobs/...` (detail pane or full page) and `/company/<slug>`
    - Indeed (any country subdomain): `/jobs?...&vjk=` detail pane, `/viewjob`,
      and `/cmp/<slug>`
+   - Any other site, homepage only (`/` or a locale root like `/nl/`): if the
+     page carries schema.org JSON-LD that names an
+     organisation (`Organization` or a subtype, or a `JobPosting`'s
+     `hiringOrganization`), a floating badge appears bottom-right. The legal
+     name, name and alternate name are tried in that order. Pages without such
+     data are left alone.
 3. Matching normalises both names (lowercase, strip accents/punctuation, drop
    legal forms like `B.V.`, `N.V.`, `Holding`, `Netherlands`, `Koninklijke`...):
    - identical → **✓ recognised sponsor**
@@ -40,7 +47,7 @@ scripts/        icon generator, snapshot updater, zip for upload
 
 ```bash
 npm install
-npm run icons        # generates placeholder icons in src/assets/icons
+npm run icons        # only after changing src/assets/icons/logo.png (needs Pillow: pip install pillow)
 cp .env.example .env # optional: fill in Supabase URL + anon key
 npm run build        # -> dist/
 ```
@@ -80,7 +87,7 @@ new domain to `host_permissions` in `manifest.config.ts` and release an update.
 | `npm run dev`      | Vite dev server with extension hot reload                     |
 | `npm run build`    | type-check + production build into `dist/`                    |
 | `npm test`         | unit tests (vitest)                                           |
-| `npm run icons`    | regenerate placeholder PNG icons                              |
+| `npm run icons`    | regenerate the PNG icons from `logo.png` (needs Pillow)       |
 | `npm run snapshot` | refresh `src/data/sponsors-snapshot.json` from ind.nl         |
 | `npm run zip`      | zip `dist/` into `release/` for the Chrome Web Store          |
 

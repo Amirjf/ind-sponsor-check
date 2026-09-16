@@ -87,3 +87,50 @@
   background: #374151 !important;
   cursor: default !important;
 }
+
+/* Floating box for company websites (no company-name element to attach to). */
+.indsc-float {
+  position: fixed !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5em !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 8px 8px 8px 12px !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.indsc-float .indsc-badge {
+  margin: 0 !important;
+}
+.indsc-float__name {
+  font-weight: 600 !important;
+  color: #111 !important;
+  max-width: 220px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.indsc-float__close {
+  all: unset !important;
+  cursor: pointer !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  text-align: center !important;
+  line-height: 22px !important;
+  font-size: 16px !important;
+  color: #555 !important;
+}
+.indsc-float__close:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #111 !important;
+}

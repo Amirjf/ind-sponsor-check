@@ -1,16 +1,19 @@
-# Privacy Policy — IND Sponsor Check for LinkedIn
+# Privacy Policy — IND Sponsor Check
 
 _Last updated: 16 September 2026_
 
-**IND Sponsor Check for LinkedIn** (the "Extension") is a browser extension
-that shows whether a company shown on LinkedIn or Indeed appears in the public
+**IND Sponsor Check** (the "Extension") is a browser extension
+that shows whether a company shown on LinkedIn, Indeed or a company's own
+website appears in the public
 register of recognised sponsors published by the Dutch Immigration and
 Naturalisation Service (IND).
 
 ## What the Extension does with data
 
 - The Extension reads the **company name** shown on the LinkedIn or Indeed
-  job or company page you are currently viewing. This happens entirely inside your browser.
+  job or company page you are currently viewing. On any other website it reads
+  only the page's public structured data (schema.org JSON-LD) to find the
+  organisation name. This happens entirely inside your browser.
 - The company name is compared against a copy of the IND public register that
   is stored locally in your browser.
 - The Extension **does not send the company name, the job you are viewing, or

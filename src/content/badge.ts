@@ -1,6 +1,7 @@
 import type { CheckResponse } from '../shared/types'
 
 export const BADGE_CLASS = 'indsc-badge'
+export const FLOAT_CLASS = 'indsc-float'
 
 export function createBadge(name: string): HTMLAnchorElement {
   const badge = document.createElement('a')
@@ -41,4 +42,35 @@ export function renderError(badge: HTMLAnchorElement, message: string) {
   badge.textContent = '! IND check unavailable'
   badge.title = message
   badge.removeAttribute('href')
+}
+
+/**
+ * Fixed-position box for pages without a company-name element (company
+ * websites): shows the name found in the page's structured data, the badge,
+ * and a close button.
+ */
+export function createFloatingContainer(name: string, badge: HTMLElement, onClose: () => void): HTMLElement {
+  const box = document.createElement('div')
+  box.className = FLOAT_CLASS
+  box.setAttribute('role', 'status')
+
+  const label = document.createElement('span')
+  label.className = `${FLOAT_CLASS}__name`
+  label.textContent = name
+  label.title = `Company name from this page's structured data (schema.org): ${name}`
+
+  const close = document.createElement('button')
+  close.type = 'button'
+  close.className = `${FLOAT_CLASS}__close`
+  close.textContent = '×'
+  close.title = 'Hide'
+  close.setAttribute('aria-label', 'Hide IND sponsor check')
+  close.addEventListener('click', (e) => {
+    e.stopPropagation()
+    onClose()
+    box.remove()
+  })
+
+  box.append(label, badge, close)
+  return box
 }
