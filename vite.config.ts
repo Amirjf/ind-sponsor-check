@@ -8,7 +8,6 @@ export default defineConfig({
   server: {
     cors: { origin: [/chrome-extension:\/\//] },
   },
-  publicDir: false,
   build: {
     emptyOutDir: true,
     // the bundled register snapshot lives in the service worker chunk
