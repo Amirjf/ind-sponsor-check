@@ -9,6 +9,12 @@ Shows on LinkedIn, Indeed and company websites whether the company is an IND rec
 ## Category
 Productivity
 
+## Website
+https://zal-group.nl/ind-sponsor-check
+
+## Privacy policy URL
+https://zal-group.nl/ind-sponsor-check/privacy
+
 ## Description
 Looking for a job in the Netherlands as a non-EU candidate? Only companies that
 are "recognised sponsors" with the IND (Immigration and Naturalisation Service)
@@ -17,7 +23,9 @@ can sponsor a highly skilled migrant visa.
 This extension adds a small badge next to the company name on every LinkedIn
 or Indeed job you open and on every company profile page. On a company's own
 website it shows a small floating badge (bottom-right) on the homepage when the
-site publishes its organisation name as structured data (schema.org JSON-LD):
+site publishes its organisation name as structured data (schema.org JSON-LD).
+Everyday sites such as search engines, social networks, developer tools and
+Dutch government domains are skipped:
 
 - ✓ green: the company is in the IND public register of recognised sponsors
 - ≈ yellow: companies with a similar name are in the register (click the badge to see the list)
@@ -27,8 +35,13 @@ Click the badge to open the official IND register. The list is downloaded from
 ind.nl and refreshed automatically once a day; a built-in copy makes the
 extension work offline and on first install.
 
+You stay in control of the floating badge on company websites: its × hides it
+for now, on that site only, or on all company websites — and the popup undoes
+any of those choices. The badges on LinkedIn and Indeed are not affected.
+
 The popup lets you check any company name by hand and shows when the list was
-last updated.
+last updated. A short welcome page opens once on install to explain the three
+badge colours.
 
 The extension does not collect, store or transmit any personal data. It only
 reads the company name on the page you are viewing (LinkedIn, Indeed, or the
@@ -43,7 +56,8 @@ or Indeed job or company page, or a company's own website) is listed in the
 IND public register of recognised sponsors.
 
 ## Permission justifications (reviewer field)
-- `storage`: cache the downloaded sponsor list and settings locally.
+- `storage`: cache the downloaded sponsor list, the remote settings and the
+  user's own badge preferences locally.
 - `alarms`: refresh the sponsor list once a day in the background.
 - Content script on `https://*/*` and `http://*/*`: reads the company name on
   LinkedIn and Indeed job and company pages, and on any other site reads only
@@ -54,16 +68,20 @@ IND public register of recognised sponsors.
   LinkedIn and Indeed are single-page apps, so the script must also be present
   site-wide there.
 - Host `https://ind.nl/*`: download the public sponsor register.
-- Host `https://*.supabase.co/*`: read a small remote configuration table
-  (the register URL and refresh interval) so the extension can be repaired
-  without a new release if IND moves the page.
+- Host `https://*.supabase.co/*`: read two small public tables — the register
+  URL with the refresh interval, and the list of sites on which the badge stays
+  hidden — so the extension can be repaired without a new release if IND moves
+  the page. Anonymous reads; no user data is sent.
 
 ## Data usage disclosure
 - Does not collect user data.
-- Does not use remote code. (Remote data only: the sponsor list and a JSON settings table.)
+- Does not use remote code. (Remote data only: the sponsor list and two JSON
+  tables of configuration.)
 
-## Assets needed before submitting
+## Assets for the submission
 - 128x128 icon: `src/assets/icons/icon-128.png` (generated from `logo.png` by `npm run icons`)
-- At least one 1280x800 or 640x400 screenshot of a LinkedIn job page with the badge
-- Optional 440x280 small promo tile
-- A public privacy policy URL (see `store/privacy-policy.md`; host it on GitHub Pages or any site)
+- Screenshots (1280x800, ready to upload): `store/screenshots/1280x800/`
+  — personal names and faces are blurred; regenerate with the script in the
+  README after replacing an original in `store/screenshots/`
+- Package: `release/ind-sponsor-check-1.0.0.zip` (`npm run build && npm run zip`)
+- Optional 440x280 small promo tile — not made yet

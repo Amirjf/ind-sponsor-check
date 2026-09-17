@@ -12,10 +12,12 @@ src/
   content/      content script: finds the company name, injects the badge
   content/sites/  one adapter per job site (linkedin.ts, indeed.ts) + website.ts (JSON-LD)
   popup/        React popup: manual lookup, list status, refresh button
-  shared/       pure logic (name normalisation, matching, HTML parsing) — unit tested
+  intro/        React welcome page, opened once on install (also linked from the popup)
+  assets/       icons and the web-sized screenshots the intro page imports
+  shared/       pure logic (name normalisation, matching, HTML parsing, user prefs) — unit tested
   data/         bundled snapshot of the register (offline / first-run fallback)
 supabase/       schema.sql for the remote settings table
-store/          Chrome Web Store listing text + privacy policy
+store/          Chrome Web Store listing text, privacy policy, full-size screenshots
 scripts/        icon generator, snapshot updater, zip for upload
 ```
 
@@ -25,19 +27,32 @@ scripts/        icon generator, snapshot updater, zip for upload
    reads the settings table from Supabase, downloads the page at `register_url`,
    parses the Organisation / KVK table and stores it in `chrome.storage.local`.
    Until the first download succeeds it uses the bundled snapshot in `src/data`.
+   Every company lookup also kicks off this refresh opportunistically, so both
+   the settings read and the register download are gated on age — otherwise the
+   `ignored_hosts` table (a couple of thousand rows, paged) would be
+   re-downloaded on every job page opened. Only the alarm, install and the
+   popup's **Refresh now** button bypass the gate.
 2. The content script watches the page DOM (both sites are single-page apps),
    finds the company name on the open job or company profile, and asks the
    service worker for a match. Supported pages:
    - LinkedIn: `/jobs/...` (detail pane or full page) and `/company/<slug>`
    - Indeed (any country subdomain): `/jobs?...&vjk=` detail pane, `/viewjob`,
      and `/cmp/<slug>`
-   - Any other site, homepage only (`/` or a locale root like `/nl/`): if the
-     page carries schema.org JSON-LD that names an
-     organisation (`Organization` or a subtype, or a `JobPosting`'s
+   - Any other site, homepage only (`/` or a locale root like `/nl/`) and not
+     on the ignore list (search engines, social networks, dev tools and every
+     Dutch government domain: see `src/shared/ignored-hosts.ts`, extended by the
+     Supabase `ignored_hosts` table): if the page carries schema.org JSON-LD
+     that names an organisation (`Organization` or a subtype, or a `JobPosting`'s
      `hiringOrganization`), a floating badge appears bottom-right. The legal
      name, name and alternate name are tried in that order. Pages without such
      data are left alone.
-3. Matching normalises both names (lowercase, strip accents/punctuation, drop
+3. The floating badge's `×` opens a small menu: hide it for now, hide it on
+   this site (the host is added to `mutedHosts`), or hide it on all company
+   websites (`websiteBadge: false`). Those choices live in `chrome.storage.local`
+   under `userPrefs`, separately from the Supabase-backed settings, and are
+   undone from the popup. They only affect the generic website check; the
+   LinkedIn and Indeed badges are not touched.
+4. Matching normalises both names (lowercase, strip accents/punctuation, drop
    legal forms like `B.V.`, `N.V.`, `Holding`, `Netherlands`, `Koninklijke`...):
    - identical → **✓ recognised sponsor**
    - one is a word-prefix of the other (`ING` vs `ING Bank`) → **≈ likely**
@@ -74,7 +89,32 @@ register URL remotely:
 | `refresh_hours`     | how often to re-download (1–720)                                        |
 | `sponsors_json_url` | optional JSON list to use instead of parsing the page (leave empty)     |
 
-The anon key only grants `SELECT` on this table (see the RLS policy in the SQL).
+The same SQL also creates the `ignored_hosts` table (one registrable domain
+per row, no `www.`; subdomains are covered). Add a row to silence the
+company-website check on a site; the bundled defaults in
+`src/shared/ignored-hosts.ts` always apply as well. Rows are grouped by
+`category`:
+
+| category     | rows | what it covers                                                        |
+|--------------|------|-----------------------------------------------------------------------|
+| `everyday`   |  ~46 | search, social, video, shopping, dev tools, the other job sites        |
+| `government` | ~2000| every Dutch ministry, agency, municipality, province and water board   |
+
+Run `supabase/seed-government-hosts.sql` after `schema.sql` to load the
+government set. It is generated from the [Open State Foundation
+dataset](https://github.com/openstate/datasets/tree/master/government_domain_names),
+which is compiled from the official Websiteregister Rijksoverheid and the
+Overheidsalmanak. Private vendors that appear in that register only because
+government uses them (for example `arcgis.com`) are excluded, so the badge
+still works on their own sites.
+
+To drop a site back in, delete its row:
+
+```sql
+delete from public.ignored_hosts where host = 'rijkswaterstaat.nl';
+```
+
+The anon key only grants `SELECT` on these tables (see the RLS policies in the SQL).
 
 If IND ever moves the register to a domain other than `ind.nl`, either host a
 JSON copy in Supabase Storage and point `sponsors_json_url` at it, or add the
@@ -89,19 +129,48 @@ new domain to `host_permissions` in `manifest.config.ts` and release an update.
 | `npm test`         | unit tests (vitest)                                           |
 | `npm run icons`    | regenerate the PNG icons from `logo.png` (needs Pillow)       |
 | `npm run snapshot` | refresh `src/data/sponsors-snapshot.json` from ind.nl         |
+| `npm run shots`    | rebuild the store + intro screenshots from `store/screenshots/` |
 | `npm run zip`      | zip `dist/` into `release/` for the Chrome Web Store          |
 
 ## Publishing to the Chrome Web Store
 
-1. `npm run build && npm run zip`
-2. Register a developer account at https://chrome.google.com/webstore/devconsole
+1. `npm test && npm run build && npm run zip` — the zip lands in `release/`
+   named after `version` in `package.json`.
+2. `npm run shots` — regenerates the 1280x800 uploads in
+   `store/screenshots/1280x800/` (see [Screenshots](#screenshots)).
+3. Register a developer account at https://chrome.google.com/webstore/devconsole
    (one-time $5 fee).
-3. **New item** → upload the zip from `release/`.
-4. Fill in the listing from `store/listing.md`, upload screenshots and the
-   128px icon, and paste the permission justifications.
-5. Host `store/privacy-policy.md` somewhere public (e.g. GitHub Pages) and link
-   it in the *Privacy* tab. Declare "does not collect user data".
-6. Submit for review. Bump `version` in `package.json` for every later upload.
+4. **New item** → upload the zip from `release/`.
+5. Fill in the listing from `store/listing.md`: description, the screenshots
+   from `store/screenshots/1280x800/`, the 128px icon, the single-purpose
+   statement and the permission justifications.
+6. *Privacy* tab: link the policy at https://zal-group.nl/ind-sponsor-check/privacy
+   (source of truth: `store/privacy-policy.md` — publish it there before
+   submitting) and declare "does not collect user data".
+7. Submit for review. Bump `version` in `package.json` for every later upload;
+   the store rejects a re-upload of a version it already has.
+
+The popup's feedback link (`CONTACT_URL` in `src/shared/config.ts`) and the
+privacy policy both point at the product page on zal-group.nl. Both pages have
+to exist before the listing goes live, or the reviewer follows a dead link.
+
+## Screenshots
+
+Full-size captures live in `store/screenshots/` and are the source for two
+things:
+
+- **The store listing.** `npm run shots` scales each capture onto a 1280x800
+  canvas (the size the store requires) and blurs the regions listed in
+  `scripts/store-screenshots.py` — names, faces and account activity, which
+  must not go on a public listing. The regions are fractions of the source
+  capture, so re-check them whenever a capture is replaced.
+- **The intro page**, which imports the copies in `src/assets/screenshots/`.
+  The same script writes those at 1600px wide — small enough to ship, and
+  blurred the same way, since the intro page is shown to every user.
+
+Both outputs are generated, never edited by hand: drop a new capture into
+`store/screenshots/`, adjust its regions in `scripts/store-screenshots.py`, and
+re-run `npm run shots`.
 
 ## Security notes for contributors
 

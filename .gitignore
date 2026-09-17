@@ -7,3 +7,6 @@ release
 .DS_Store
 *.log
 .vite
+
+# local badge-layout preview harness (served by the dev server)
+.preview

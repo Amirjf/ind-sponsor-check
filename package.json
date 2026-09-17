@@ -1,6 +1,6 @@
 {
   "name": "ind-sponsor-check",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Shows whether a company on LinkedIn, Indeed or its own website is an IND recognised sponsor (Netherlands).",
   "type": "module",
@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "icons": "python3 scripts/resize-icons.py",
     "snapshot": "node scripts/update-snapshot.ts",
-    "zip": "node scripts/zip.mjs"
+    "zip": "node scripts/zip.mjs",
+    "shots": "python3 scripts/store-screenshots.py"
   },
   "dependencies": {
     "react": "^19.3.0",

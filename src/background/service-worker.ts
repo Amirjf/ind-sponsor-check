@@ -1,6 +1,9 @@
 import { ALARM_NAME, STORAGE_KEYS } from '../shared/config'
-import type { CheckResponse, Message, StatusInfo } from '../shared/types'
-import { fetchRemoteSettings, loadCachedSettings, supabaseConfigured } from './settings'
+import type { CheckResponse, HostPolicyResponse, Message, StatusInfo } from '../shared/types'
+import { websiteBadgePolicy } from './host-policy'
+import { openIntroOnInstall } from './onboarding'
+import { loadPrefs, muteHostPref, patchPrefs } from './prefs'
+import { fetchRemoteSettings, loadCachedSettings, settingsAreStale, supabaseConfigured } from './settings'
 import { check, getCacheOrBundled, isStale, refreshSponsors } from './sponsor-store'
 
 let refreshing: Promise<void> | null = null
@@ -14,15 +17,24 @@ async function getLastError(): Promise<string | null> {
   return (stored[STORAGE_KEYS.lastError] as string | null | undefined) ?? null
 }
 
-/** Re-reads settings from Supabase, then re-downloads the register if needed. */
+/**
+ * Re-reads settings from Supabase, then re-downloads the register if needed.
+ *
+ * Both fetches are gated on age. That matters because every company lookup
+ * calls this opportunistically: without the gate, the `ignored_hosts` table
+ * (a couple of thousand rows, paged) would be re-downloaded on every job page
+ * the user opens. `force` is for install, the alarm and the popup's button.
+ */
 function refresh(force: boolean): Promise<void> {
   if (refreshing) return refreshing
   refreshing = (async () => {
     let settings = await loadCachedSettings()
-    try {
-      settings = await fetchRemoteSettings()
-    } catch (err) {
-      console.warn('[ind-sponsor-check] settings fetch failed, using cached/default', err)
+    if (force || settingsAreStale(settings)) {
+      try {
+        settings = await fetchRemoteSettings()
+      } catch (err) {
+        console.warn('[ind-sponsor-check] settings fetch failed, using cached/default', err)
+      }
     }
     await scheduleAlarm(settings.refreshHours)
 
@@ -67,7 +79,8 @@ async function status(): Promise<StatusInfo> {
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
+  openIntroOnInstall(details)
   void refresh(true)
 })
 
@@ -89,6 +102,22 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
         // Opportunistic background refresh; never blocks the answer.
         void refresh(false)
       })()
+      return true
+    }
+    case 'IS_HOST_IGNORED': {
+      void websiteBadgePolicy(message.host).then((policy) => sendResponse(policy satisfies HostPolicyResponse))
+      return true
+    }
+    case 'GET_PREFS': {
+      void loadPrefs().then(sendResponse)
+      return true
+    }
+    case 'SET_PREFS': {
+      void patchPrefs(message.prefs).then(sendResponse)
+      return true
+    }
+    case 'MUTE_HOST': {
+      void muteHostPref(message.host).then(sendResponse)
       return true
     }
     case 'GET_STATUS': {

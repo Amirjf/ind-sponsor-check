@@ -1,3 +1,5 @@
+import type { UserPrefs, WebsiteBadgeMode } from './user-prefs'
+
 /** One row of the IND public register of recognised sponsors. */
 export interface Sponsor {
   name: string
@@ -36,6 +38,8 @@ export interface RemoteSettings {
   sponsorsJsonUrl?: string
   /** How often to re-download the register, in hours. */
   refreshHours: number
+  /** Hosts from the Supabase `ignored_hosts` table (merged with the bundled defaults at lookup time). */
+  ignoredHosts?: string[]
   /** Epoch ms when these settings were last fetched from Supabase. */
   fetchedAt?: number
 }
@@ -55,8 +59,20 @@ export interface StatusInfo {
 
 export type Message =
   | { type: 'CHECK_COMPANY'; name: string }
+  | { type: 'IS_HOST_IGNORED'; host: string }
   | { type: 'GET_STATUS' }
   | { type: 'REFRESH' }
+  | { type: 'GET_PREFS' }
+  /** Partial update; fields left out keep their stored value. Answers with the saved prefs. */
+  | { type: 'SET_PREFS'; prefs: Partial<UserPrefs> }
+  /** Adds one host to the muted list. Answers with the saved prefs. */
+  | { type: 'MUTE_HOST'; host: string }
+
+export interface HostPolicyResponse {
+  ignored: boolean
+  /** Layout the company-website badge should open in. */
+  mode: WebsiteBadgeMode
+}
 
 export interface CheckResponse extends MatchResult {
   registerUrl: string

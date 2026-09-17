@@ -10,6 +10,10 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: true,
+    rollupOptions: {
+      // Extension pages not referenced by the manifest must be listed here.
+      input: { intro: 'src/intro/index.html' },
+    },
     // the bundled register snapshot lives in the service worker chunk
     chunkSizeWarningLimit: 1000,
   },

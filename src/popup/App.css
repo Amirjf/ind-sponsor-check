@@ -37,14 +37,47 @@ body {
   color: var(--fg);
   background: var(--bg);
 }
-.app { padding: 14px; display: grid; gap: 12px; }
-h1 { font-size: 15px; margin: 0; }
-.sub { color: var(--muted); margin: 2px 0 0; }
+.app { padding: 14px; display: grid; gap: 10px; }
+
+header { display: flex; align-items: center; gap: 8px; }
+h1 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.card > label { display: block; font-weight: 600; margin-bottom: 6px; }
+
 .row { display: flex; justify-content: space-between; gap: 8px; }
-.row + .row { margin-top: 4px; }
+.row + .row { margin-top: 3px; }
 .label { color: var(--muted); }
-.error { color: var(--bad); }
+.hint { color: var(--muted); margin: 8px 0 0; }
+.error { color: var(--bad); margin: 8px 0 0; }
+
+/* Diagnostics: one quiet line that opens into the detail. */
+.details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  color: var(--muted);
+}
+.details summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.details summary::-webkit-details-marker { display: none; }
+.details summary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-left-color: currentColor;
+  transition: transform 0.15s ease;
+}
+.details[open] summary::before { transform: rotate(90deg) translateX(-1px); }
+.details__body { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--fg); }
+.details__body .actions { margin-top: 8px; }
+
 .actions { display: flex; gap: 8px; align-items: center; }
 button {
   font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
@@ -52,14 +85,30 @@ button {
 }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button:disabled { opacity: 0.6; cursor: default; }
+
+/* Only rendered once the user has hidden a badge from the badge's own menu. */
+.hidden-badges__row { align-items: center; min-height: 30px; }
+.hidden-badges__row + .hidden-badges__row { margin-top: 5px; }
+.hidden-badges__host { overflow-wrap: anywhere; }
+.hidden-badges button { padding: 3px 10px; }
+
+/* Sends people to the site's contact page; deliberately quiet. */
+.contact { justify-self: start; }
+
 input {
   font: inherit; width: 100%; padding: 7px 10px; border-radius: 6px;
   border: 1px solid var(--border); background: var(--bg); color: var(--fg);
 }
+input:focus-visible, button:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+
 .result { margin-top: 8px; padding: 8px 10px; border-radius: 6px; }
 .result--sponsor { background: var(--ok-bg); color: var(--ok); }
 .result--likely { background: var(--warn-bg); color: var(--warn); }
 .result--none { background: var(--bad-bg); color: var(--bad); }
 .result ul { margin: 6px 0 0; padding-left: 18px; }
+.result .label { color: inherit; opacity: 0.75; }
+
 a { color: var(--accent); }
-.foot { color: var(--muted); font-size: 12px; }
+.foot { color: var(--muted); font-size: 12px; margin: 2px 0 0; }

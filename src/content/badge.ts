@@ -1,4 +1,7 @@
+import { createDismissMenu, type DismissChoice } from './dismiss-menu'
+import { MODES_CLASS, createModeToggle, paintModeToggle } from './mode-toggle'
 import type { CheckResponse } from '../shared/types'
+import type { WebsiteBadgeMode } from '../shared/user-prefs'
 
 export const BADGE_CLASS = 'indsc-badge'
 export const FLOAT_CLASS = 'indsc-float'
@@ -24,8 +27,25 @@ export function createBadge(name: string): HTMLAnchorElement {
   return badge
 }
 
+/** Single character the compact chip shows per status, matching the badge's own prefix. */
+const CHIP_GLYPHS: Record<string, string> = { checking: '…', sponsor: '✓', likely: '≈', none: '✕', error: '!' }
+
+/**
+ * Mirrors the badge's state onto the floating box it sits in, so the compact
+ * chip (which is all you see until you point at it) carries the same glyph and
+ * colour as the badge hidden behind it. A no-op for inline badges.
+ */
+function syncFloatStatus(badge: HTMLElement, status: string) {
+  const box = badge.closest(`.${FLOAT_CLASS}`)
+  if (!(box instanceof HTMLElement)) return
+  box.dataset.status = status
+  const chip = box.querySelector(`.${FLOAT_CLASS}__chip`)
+  if (chip) chip.textContent = CHIP_GLYPHS[status] ?? '·'
+}
+
 export function renderResult(badge: HTMLAnchorElement, result: CheckResponse) {
   disposeBadge(badge)
+  syncFloatStatus(badge, result.status)
   badge.className = `${BADGE_CLASS} ${BADGE_CLASS}--${result.status}`
   badge.href = result.registerUrl
   badge.removeAttribute('role')
@@ -209,40 +229,110 @@ function buildMenu(result: CheckResponse): HTMLElement {
 
 export function renderError(badge: HTMLAnchorElement, message: string) {
   disposeBadge(badge)
+  syncFloatStatus(badge, 'error')
   badge.className = `${BADGE_CLASS} ${BADGE_CLASS}--error`
   badge.textContent = '! IND check unavailable'
   badge.title = message
   badge.removeAttribute('href')
 }
 
+export interface FloatingContainerOptions {
+  /** Company name from the page's structured data. */
+  name: string
+  /** Registrable host, for the wording of the hide menu. */
+  host: string
+  badge: HTMLElement
+  /** Layout to open in. */
+  mode: WebsiteBadgeMode
+  onDismiss: (choice: DismissChoice) => void
+  /** The user picked the other layout from the toggle; persist it. */
+  onModeChange: (mode: WebsiteBadgeMode) => void
+}
+
 /**
  * Fixed-position box for pages without a company-name element (company
- * websites): shows the name found in the page's structured data, the badge,
- * and a close button.
+ * websites): the name found in the page's structured data, the badge, a toggle
+ * between the two layouts, and a close button that asks how long "hidden"
+ * should last.
+ *
+ * Both layouts are the same DOM — `compact` only adds a class, so switching is
+ * instant and nothing has to be looked up or rendered again. The chip is always
+ * present and hidden by CSS in `card` mode, which keeps the status in one place.
  */
-export function createFloatingContainer(name: string, badge: HTMLElement, onClose: () => void): HTMLElement {
+export function createFloatingContainer({
+  name,
+  host,
+  badge,
+  mode,
+  onDismiss,
+  onModeChange,
+}: FloatingContainerOptions): HTMLElement {
   const box = document.createElement('div')
   box.className = FLOAT_CLASS
   box.setAttribute('role', 'status')
+  box.dataset.status = 'checking'
+
+  const chip = document.createElement('button')
+  chip.type = 'button'
+  chip.className = `${FLOAT_CLASS}__chip`
+  chip.textContent = CHIP_GLYPHS.checking
+  chip.setAttribute('aria-expanded', 'false')
+  chip.setAttribute('aria-label', `IND sponsor check for ${name}. Show the details`)
+  chip.addEventListener('click', (e) => {
+    e.stopPropagation()
+    setExpanded(box, !box.classList.contains(`${FLOAT_CLASS}--expanded`))
+  })
+
+  // `display: contents` in card mode, so the box keeps its flat flex row; in
+  // compact mode this is the part that slides out from under the chip.
+  const body = document.createElement('div')
+  body.className = `${FLOAT_CLASS}__body`
 
   const label = document.createElement('span')
   label.className = `${FLOAT_CLASS}__name`
   label.textContent = name
   label.title = `Company name from this page's structured data (schema.org): ${name}`
 
-  const close = document.createElement('button')
-  close.type = 'button'
-  close.className = `${FLOAT_CLASS}__close`
-  close.textContent = '×'
-  close.title = 'Hide'
-  close.setAttribute('aria-label', 'Hide IND sponsor check')
-  close.addEventListener('click', (e) => {
-    e.stopPropagation()
-    onClose()
+  const modes = document.createElement('div')
+  modes.className = MODES_CLASS
+  modes.appendChild(
+    createModeToggle(mode, (next) => {
+      setFloatMode(box, next)
+      onModeChange(next)
+    }),
+  )
+
+  const dismiss = createDismissMenu(host, (choice) => {
+    onDismiss(choice)
+    dismiss.dispose()
     disposeBadge(badge)
     box.remove()
   })
 
-  box.append(label, badge, close)
+  // Pointing away closes a chip that was opened by click, so it cannot be left
+  // sitting open over the page.
+  box.addEventListener('mouseleave', () => setExpanded(box, false))
+
+  body.append(label, badge, modes, dismiss.element)
+  // Chip last: the box is anchored to the bottom-right corner, so keeping the
+  // chip on that edge means it stays put and the panel slides out beside it.
+  box.append(body, chip)
+  setFloatMode(box, mode)
   return box
+}
+
+function setExpanded(box: HTMLElement, expanded: boolean) {
+  box.classList.toggle(`${FLOAT_CLASS}--expanded`, expanded)
+  box.querySelector(`.${FLOAT_CLASS}__chip`)?.setAttribute('aria-expanded', String(expanded))
+}
+
+/**
+ * Switches an existing floating box between the two layouts. Called by the
+ * toggle, and by the content script when the pref changes in another tab.
+ */
+export function setFloatMode(box: HTMLElement, mode: WebsiteBadgeMode) {
+  box.classList.toggle(`${FLOAT_CLASS}--compact`, mode === 'compact')
+  if (mode !== 'compact') setExpanded(box, false)
+  const button = box.querySelector<HTMLButtonElement>(`.${MODES_CLASS}__button`)
+  if (button) paintModeToggle(button, mode)
 }

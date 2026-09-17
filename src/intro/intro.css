@@ -1,0 +1,216 @@
+:root {
+  color-scheme: light dark;
+  --ink: #1b2a4a;
+  --text: #24303f;
+  --muted: #5c6675;
+  --bg: #ffffff;
+  --line: #d9dee6;
+  --navy: #1f3a73;
+  --navy-hover: #17305f;
+  --shot-bg: #eef1f5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #eef1f6;
+    --text: #d5dae2;
+    --muted: #9aa4b2;
+    --bg: #14171c;
+    --line: #2c323b;
+    --navy: #8fb4ff;
+    --navy-hover: #a9c5ff;
+    --shot-bg: #1d2129;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  background: var(--bg);
+}
+body {
+  margin: 0;
+  font: 17px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--navy);
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--navy-hover);
+}
+a:focus-visible,
+.button:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.intro {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+/* Hero */
+.hero {
+  max-width: 34em;
+  margin-bottom: 40px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 36px;
+}
+.brand img {
+  border-radius: 9px;
+}
+h1 {
+  margin: 0 0 20px;
+  font-size: clamp(32px, 4.6vw, 48px);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.lede {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin: 28px 0 0;
+}
+.button {
+  display: inline-block;
+  padding: 11px 20px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.button:hover {
+  background: var(--navy-hover);
+  color: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  .button,
+  .button:hover {
+    color: #10203f;
+  }
+}
+
+/* Screenshots */
+.shot {
+  margin: 0;
+}
+.shot img {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--shot-bg);
+}
+.shot figcaption {
+  margin-top: 14px;
+  max-width: 44em;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.shot figcaption strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.shot--lead {
+  margin-bottom: 48px;
+}
+.shots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 72px;
+}
+@media (max-width: 760px) {
+  .shots {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* Legend */
+h2 {
+  margin: 0 0 20px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.legend {
+  margin-bottom: 64px;
+}
+.legend dl {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.legend dl > div {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.legend dt {
+  margin: 0;
+}
+.legend dd {
+  margin: 0;
+  max-width: 40em;
+}
+/* The badge stylesheet is written for host pages; undo the leading margin here. */
+.legend .indsc-badge {
+  margin-left: 0 !important;
+  cursor: default !important;
+}
+@media (max-width: 760px) {
+  .legend dl > div {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Notes */
+.notes {
+  max-width: 40em;
+}
+.notes ul {
+  margin: 0;
+  padding-left: 22px;
+}
+.notes li + li {
+  margin-top: 10px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition: background-color 120ms ease;
+  }
+}
