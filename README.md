@@ -13,11 +13,11 @@ src/
   content/sites/  one adapter per job site (linkedin.ts, indeed.ts) + website.ts (JSON-LD)
   popup/        React popup: manual lookup, list status, refresh button
   intro/        React welcome page, opened once on install (also linked from the popup)
-  assets/       icons and the web-sized screenshots the intro page imports
+  assets/       icons and the screenshots the intro page imports (generated, see Screenshots)
   shared/       pure logic (name normalisation, matching, HTML parsing, user prefs) — unit tested
   data/         bundled snapshot of the register (offline / first-run fallback)
 supabase/       schema.sql for the remote settings table
-store/          Chrome Web Store listing text, privacy policy, full-size screenshots
+store/          Chrome Web Store listing text, privacy policy, screenshot scenes + renders
 scripts/        icon generator, snapshot updater, zip for upload
 ```
 
@@ -38,14 +38,20 @@ scripts/        icon generator, snapshot updater, zip for upload
    - LinkedIn: `/jobs/...` (detail pane or full page) and `/company/<slug>`
    - Indeed (any country subdomain): `/jobs?...&vjk=` detail pane, `/viewjob`,
      and `/cmp/<slug>`
-   - Any other site, homepage only (`/` or a locale root like `/nl/`) and not
-     on the ignore list (search engines, social networks, dev tools and every
-     Dutch government domain: see `src/shared/ignored-hosts.ts`, extended by the
-     Supabase `ignored_hosts` table): if the page carries schema.org JSON-LD
-     that names an organisation (`Organization` or a subtype, or a `JobPosting`'s
-     `hiringOrganization`), a floating badge appears bottom-right. The legal
-     name, name and alternate name are tried in that order. Pages without such
-     data are left alone.
+   - Any other site not on the ignore list (search engines, social networks,
+     dev tools and every Dutch government domain: see
+     `src/shared/ignored-hosts.ts`, extended by the Supabase `ignored_hosts`
+     table), when the page carries schema.org JSON-LD naming an organisation:
+     a floating badge appears bottom-right. Two kinds of page qualify:
+     - the homepage (`/` or a locale root like `/nl/`), where any
+       `Organization` (or subtype) node describes the company itself;
+     - any URL carrying a `JobPosting` with a `hiringOrganization` — a careers
+       subpage, a Greenhouse or Lever board, an ATS. Only the hiring
+       organisation is read there; other organisations on such a page belong to
+       whoever runs the board, not to the employer.
+
+     The legal name, name and alternate name are tried in that order. Pages
+     without such data are left alone.
 3. The floating badge's `×` opens a small menu: hide it for now, hide it on
    this site (the host is added to `mutedHosts`), or hide it on all company
    websites (`websiteBadge: false`). Those choices live in `chrome.storage.local`
@@ -129,15 +135,15 @@ new domain to `host_permissions` in `manifest.config.ts` and release an update.
 | `npm test`         | unit tests (vitest)                                           |
 | `npm run icons`    | regenerate the PNG icons from `logo.png` (needs Pillow)       |
 | `npm run snapshot` | refresh `src/data/sponsors-snapshot.json` from ind.nl         |
-| `npm run shots`    | rebuild the store + intro screenshots from `store/screenshots/` |
+| `npm run shots`    | render the store + intro screenshots from `store/scenes/` (needs `npm run dev`) |
 | `npm run zip`      | zip `dist/` into `release/` for the Chrome Web Store          |
 
 ## Publishing to the Chrome Web Store
 
 1. `npm test && npm run build && npm run zip` — the zip lands in `release/`
    named after `version` in `package.json`.
-2. `npm run shots` — regenerates the 1280x800 uploads in
-   `store/screenshots/1280x800/` (see [Screenshots](#screenshots)).
+2. `npm run shots` (with `npm run dev` running) — regenerates the 1280x800
+   uploads in `store/screenshots/1280x800/` (see [Screenshots](#screenshots)).
 3. Register a developer account at https://chrome.google.com/webstore/devconsole
    (one-time $5 fee).
 4. **New item** → upload the zip from `release/`.
@@ -156,21 +162,30 @@ to exist before the listing goes live, or the reviewer follows a dead link.
 
 ## Screenshots
 
-Full-size captures live in `store/screenshots/` and are the source for two
-things:
+The store listing and the intro page both use rendered scenes, not captures of
+real pages: `store/scenes/*.html` are small mock pages (a job board, a company
+profile, a company website, the popup) that import the extension's real badge
+code from `src/content/` — and, for the popup scene, the real React popup with
+a stubbed service worker — under a bold headline. Nothing in them is a real
+person or account, so there is nothing to blur, and they can be re-rendered
+whenever the badge design changes.
 
-- **The store listing.** `npm run shots` scales each capture onto a 1280x800
-  canvas (the size the store requires) and blurs the regions listed in
-  `scripts/store-screenshots.py` — names, faces and account activity, which
-  must not go on a public listing. The regions are fractions of the source
-  capture, so re-check them whenever a capture is replaced.
-- **The intro page**, which imports the copies in `src/assets/screenshots/`.
-  The same script writes those at 1600px wide — small enough to ship, and
-  blurred the same way, since the intro page is shown to every user.
+`npm run shots` (with `npm run dev` running, so the scenes can import from
+`src/`) drives headless Chrome over each scene at 1024x640 with a 2x scale
+factor and writes:
 
-Both outputs are generated, never edited by hand: drop a new capture into
-`store/screenshots/`, adjust its regions in `scripts/store-screenshots.py`, and
-re-run `npm run shots`.
+- `store/screenshots/1280x800/<scene>.png` — the store uploads, headline
+  included, at the exact size the store requires.
+- `src/assets/screenshots/<name>.jpg` — the page area only, 1600px wide, for
+  the three figures the intro page imports.
+
+Both outputs are generated, never edited by hand: edit the scene, re-run the
+script, and look at every image before shipping. The company names in the
+scenes are chosen so the badges are truthful against the bundled register
+(Adyen is listed; "Bird" has three similar entries; the red badge belongs to a
+made-up company). If the register changes, re-check them by typing the names
+into the popup. The script expects Chrome at its default macOS
+path; set `CHROME=/path/to/chrome` otherwise.
 
 ## Security notes for contributors
 

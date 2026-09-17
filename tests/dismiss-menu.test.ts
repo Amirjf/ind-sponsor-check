@@ -93,3 +93,74 @@ describe('createDismissMenu', () => {
     expect(menu.hidden).toBe(false)
   })
 })
+
+/**
+ * The menu used to be an absolutely positioned child of the floating box. In
+ * the compact layout that box clips its sliding panel with `overflow: hidden`,
+ * which swallowed the menu whole. It is now placed against the viewport, so no
+ * ancestor's overflow can reach it.
+ */
+describe('placement', () => {
+  const SIZE = { width: 280, height: 160 }
+
+  function sized(rect: { top: number; bottom: number; left: number; right: number }) {
+    const m = mount()
+    m.button.getBoundingClientRect = () => ({ ...rect, width: rect.right - rect.left, height: rect.bottom - rect.top, x: rect.left, y: rect.top, toJSON: () => ({}) }) as DOMRect
+    Object.defineProperty(m.menu, 'offsetWidth', { value: SIZE.width, configurable: true })
+    Object.defineProperty(m.menu, 'offsetHeight', { value: SIZE.height, configurable: true })
+    return m
+  }
+  // jsdom's viewport: 1024 x 768.
+  const bottomRight = { top: 700, bottom: 722, left: 980, right: 1002 }
+
+  it('opens above the button, right edges aligned', () => {
+    const { button, menu } = sized(bottomRight)
+    button.click()
+    // 768 - 700 + 8 gap
+    expect(menu.style.bottom).toBe('76px')
+    expect(menu.style.top).toBe('auto')
+    // 1002 - 280
+    expect(menu.style.left).toBe('722px')
+  })
+
+  it('opens below when the button sits too high for the menu to fit above', () => {
+    const { button, menu } = sized({ top: 40, bottom: 62, left: 980, right: 1002 })
+    button.click()
+    expect(menu.style.top).toBe('70px')
+    expect(menu.style.bottom).toBe('auto')
+  })
+
+  it('stays inside the viewport when the button is near an edge', () => {
+    const { button, menu } = sized({ top: 700, bottom: 722, left: 18, right: 40 })
+    button.click()
+    expect(menu.style.left).toBe('12px')
+  })
+
+  it('follows the button when the viewport changes while open', () => {
+    const { button, menu } = sized(bottomRight)
+    button.click()
+    button.getBoundingClientRect = () => ({ top: 300, bottom: 322, left: 500, right: 522, width: 22, height: 22, x: 500, y: 300, toJSON: () => ({}) }) as DOMRect
+    window.dispatchEvent(new Event('resize'))
+    expect(menu.style.bottom).toBe('476px')
+    expect(menu.style.left).toBe('242px')
+  })
+
+  it('does not chase the viewport while closed', () => {
+    const { button, menu } = sized(bottomRight)
+    button.click()
+    button.click()
+    const before = menu.style.cssText
+    window.dispatchEvent(new Event('resize'))
+    expect(menu.style.cssText).toBe(before)
+  })
+
+  it('dispose drops the viewport listeners', () => {
+    const { button, menu, dispose } = sized(bottomRight)
+    button.click()
+    dispose()
+    const before = menu.style.cssText
+    button.getBoundingClientRect = () => ({ top: 300, bottom: 322, left: 500, right: 522, width: 22, height: 22, x: 500, y: 300, toJSON: () => ({}) }) as DOMRect
+    window.dispatchEvent(new Event('resize'))
+    expect(menu.style.cssText).toBe(before)
+  })
+})

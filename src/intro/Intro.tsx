@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS } from '../shared/config'
 import icon from '../assets/icons/icon-128.png'
-import jobPage from '../assets/screenshots/linkedin-job-page.jpg'
-import companyPage from '../assets/screenshots/linkedin-company-page.jpg'
+import jobPage from '../assets/screenshots/job-page.jpg'
+import companyPage from '../assets/screenshots/company-page.jpg'
 import companyWebsite from '../assets/screenshots/company-website.jpg'
 
 const LINKEDIN_JOBS_NL = 'https://www.linkedin.com/jobs/search/?location=Netherlands'
@@ -30,7 +30,7 @@ export default function Intro() {
       </header>
 
       <figure className="shot shot--lead">
-        <img src={jobPage} alt="A LinkedIn job pane with a green “IND recognised sponsor” badge next to the company name." />
+        <img src={jobPage} alt="A job page with a green “IND recognised sponsor” badge next to the company name." />
         <figcaption>
           <strong>Job pages on LinkedIn and Indeed.</strong> Open any job and the badge appears next to the company
           name, in the side pane and on the full page.
@@ -41,7 +41,7 @@ export default function Intro() {
         <figure className="shot">
           <img
             src={companyPage}
-            alt="A LinkedIn company profile with the green badge beside the company name heading."
+            alt="A company profile with the amber “similar sponsors found” badge open, listing three matching register entries."
           />
           <figcaption>
             <strong>Company profiles.</strong> Also on LinkedIn and Indeed company pages, so you can check an employer
@@ -54,8 +54,9 @@ export default function Intro() {
             alt="A company homepage with a small floating box in the bottom-right corner showing the green badge."
           />
           <figcaption>
-            <strong>Company websites.</strong> On a company's own homepage a small box appears bottom-right when the
-            site publishes its organisation name. Close it and it stays closed for that visit.
+            <strong>Company websites.</strong> On a company's own homepage — and on any job posting page that names
+            the hiring company — a small box appears bottom-right when the site publishes its organisation name. Close
+            it and it stays closed for that visit.
           </figcaption>
         </figure>
       </div>

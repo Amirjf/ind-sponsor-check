@@ -69,11 +69,12 @@ Other facts worth using on the page:
    a TODO comment so it is one edit to fill in once the listing is live. When
    it is `"#"`, render the button disabled with the label "Coming to the Chrome
    Web Store".
-2. **Screenshots** — three, from `store/screenshots/1280x800/` in the extension
-   repo (`linkedin-job-page.jpg`, `linkedin-company-page.jpg`,
-   `company-website.jpg`). Copy them into the site's asset pipeline. They are
-   already 1280x800 and already have personal details blurred; do not
-   substitute unblurred originals. Caption each with the surface it shows.
+2. **Screenshots** — from `store/screenshots/1280x800/` in the extension
+   repo: `01-job-page.png`, `03-similar-sponsors.png`, `04-company-website.png`
+   (the other two, `02-three-states.png` and `05-popup.png`, are optional).
+   Copy them into the site's asset pipeline. They are rendered mock pages with
+   a headline band, 1280x800, with no real people or accounts in them. Caption
+   each with the surface it shows.
 3. **How it works** — three short steps (install → open a job → read the
    badge), and the three-state table above.
 4. **Privacy, on the landing page itself** — a short block, not only a link:

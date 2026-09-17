@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Store screenshot 5: popup</title>
+  <!-- Vite's React plugin refuses to load JSX on a page without this preamble. -->
+  <script type="module">
+    import RefreshRuntime from '/@react-refresh'
+    RefreshRuntime.injectIntoGlobalHook(window)
+    window.$RefreshReg$ = () => {}
+    window.$RefreshSig$ = () => (type) => type
+    window.__vite_plugin_react_preamble_installed__ = true
+  </script>
+  <link rel="stylesheet" href="/store/scenes/frame.css" />
+  <style>
+    /* The popup's own stylesheet (src/popup/App.css) sizes <body> for a 340px popup; keep the frame. */
+    html body { width: 1024px !important; height: 640px !important; font-size: 16px !important; color: #fff !important;
+      background: #1b3468 !important;
+      background-image:
+        radial-gradient(720px 420px at 88% -12%, rgba(120, 170, 255, 0.35), transparent 65%),
+        radial-gradient(520px 360px at -6% 108%, rgba(60, 190, 130, 0.22), transparent 60%),
+        linear-gradient(160deg, #1b3468 0%, #1f3f7c 55%, #173060 100%) !important; }
+    .content { background: #f4f5f7; }
+    /* The real popup, mounted where Chrome would show it: under the toolbar icon. */
+    .popup { position: absolute; top: 6px; right: 8px; width: 340px; zoom: 1.06; background: #fff; color: #1a1a1a;
+      border-radius: 10px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.08);
+      font: 13px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .s-facts { position: absolute; left: 36px; top: 34px; width: 400px; display: grid; gap: 22px; }
+    .s-fact { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; }
+    .s-fact i { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-style: normal; font-size: 20px; font-weight: 800; color: #fff; }
+    .s-fact h3 { margin: 2px 0 3px; font-size: 16px; font-weight: 700; color: #1f2328; }
+    .s-fact p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="band">
+    <h1>Check <em>any company</em> by hand, straight from the popup.</h1>
+    <p>Type a name to search the register directly and see when the list was last refreshed.</p>
+  </div>
+  <div class="brand"><img src="/src/assets/icons/icon-128.png" alt="" />IND Sponsor Check</div>
+
+  <div class="window">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">linkedin.com/jobs/</div>
+      <div class="ext active"></div>
+    </div>
+    <div class="content">
+      <div class="s-facts">
+        <div class="s-fact"><i style="background:#1f3a73">↻</i><div><h3>Straight from ind.nl, refreshed daily</h3><p>The extension downloads the official public register of recognised sponsors and updates it once a day.</p></div></div>
+        <div class="s-fact"><i style="background:#0d7b35">✓</i><div><h3>Works offline and on first install</h3><p>A copy of the register ships inside the extension, so you get answers right away.</p></div></div>
+        <div class="s-fact"><i style="background:#374151">🔒</i><div><h3>Nothing leaves your browser</h3><p>No accounts, no analytics, no tracking. The company name is compared locally against the list.</p></div></div>
+      </div>
+      <div class="popup"><div id="root"></div></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { REGISTER_URL, check, waitFor } from '/store/scenes/scene.js'
+
+    // Stand-in for the service worker the popup talks to.
+    const status = {
+      count: 12984, fetchedAt: Date.now() - 3 * 3600e3, source: REGISTER_URL, registerUrl: REGISTER_URL,
+      refreshHours: 24, supabaseConfigured: true, settingsFetchedAt: Date.now(), lastError: null, refreshing: false,
+    }
+    const answers = {
+      GET_STATUS: () => status,
+      GET_PREFS: () => ({ websiteBadge: true, mutedHosts: [] }),
+      CHECK_COMPANY: (m) => check('sponsor', m.name, [
+        { name: 'Adyen N.V.', kvk: '34259528' },
+        { name: 'Adyen Netherlands B.V.', kvk: '98924397' },
+      ]),
+    }
+    window.chrome = { runtime: { sendMessage: async (m) => answers[m.type]?.(m), getURL: (p) => '/' + p } }
+
+    await import('/src/popup/main.tsx')
+    const input = await waitFor('#q')
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'Adyen')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  </script>
+</body>
+</html>

@@ -243,8 +243,7 @@
 }
 
 /* The close control: a × that opens a small menu asking how long "hidden"
-   should last. It nests inside the floating box (unlike the similar-sponsors
-   dropdown) because that box is ours and already sits above the host page. */
+   should last. */
 .indsc-dismiss {
   position: relative !important;
   flex-shrink: 0 !important;
@@ -268,10 +267,12 @@
   background: rgba(0, 0, 0, 0.08) !important;
   color: #111 !important;
 }
+/* Fixed, with the coordinates set from the button's rect in JS: the compact
+   layout clips its sliding panel with `overflow: hidden`, and that clip reaches
+   every absolutely positioned descendant — but not one laid out against the
+   viewport. */
 .indsc-dismiss__menu {
-  position: absolute !important;
-  right: 0 !important;
-  bottom: calc(100% + 8px) !important;
+  position: fixed !important;
   z-index: 1 !important;
   box-sizing: border-box !important;
   width: max-content !important;

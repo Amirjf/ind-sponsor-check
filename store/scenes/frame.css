@@ -1,0 +1,219 @@
+/* Shared frame for the Chrome Web Store screenshots.
+
+   Each scene is a 1024x640 page rendered by headless Chrome at 2x and scaled
+   to the 1280x800 the store wants (see scripts/store-screenshots.py). Working
+   at 1024 instead of 1280 makes everything, the 13px badge included, 25%
+   larger in the final image. */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  width: 1024px;
+  height: 640px;
+  overflow: hidden;
+}
+body {
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #fff;
+  background: #1b3468;
+  background-image:
+    radial-gradient(720px 420px at 88% -12%, rgba(120, 170, 255, 0.35), transparent 65%),
+    radial-gradient(520px 360px at -6% 108%, rgba(60, 190, 130, 0.22), transparent 60%),
+    linear-gradient(160deg, #1b3468 0%, #1f3f7c 55%, #173060 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headline band */
+.band {
+  position: absolute;
+  top: 36px;
+  left: 52px;
+  right: 52px;
+}
+.band h1 {
+  margin: 0;
+  font-size: 37px;
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+  /* keep clear of the brand chip */
+  padding-right: 240px;
+}
+.band h1 em {
+  font-style: normal;
+  color: #8ee6ad;
+}
+.band p {
+  margin: 10px 0 0;
+  font-size: 16.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+.band p b {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Brand chip, top right */
+.brand {
+  position: absolute;
+  top: 38px;
+  right: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+.brand img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Browser window */
+.window {
+  position: absolute;
+  top: 172px;
+  left: 52px;
+  right: 52px;
+  bottom: 26px;
+  border-radius: 12px;
+  background: #fff;
+  color: #1f2328;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.bar {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e3e6ea;
+}
+.dots {
+  display: flex;
+  gap: 6px;
+  margin-right: 6px;
+}
+.dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d5d9df;
+}
+.url {
+  flex: 0 1 380px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  font-size: 12px;
+  color: #5c6675;
+  white-space: nowrap;
+}
+.url::before {
+  content: '';
+  width: 9px;
+  height: 11px;
+  border: 1.5px solid #8a94a3;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.ext {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: url('/src/assets/icons/icon-32.png') center / 18px no-repeat;
+}
+.ext.active {
+  background-color: #dfe6f2;
+}
+.content {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+/* Shared bits for the job-board and company-page mocks */
+.logo {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.logo.lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  font-size: 22px;
+}
+.co {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2328;
+}
+.muted {
+  color: #5c6675;
+}
+.pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid #cfd4db;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #1f2328;
+  margin-right: 8px;
+}
+.btn {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.btn.primary {
+  background: #1f3a73;
+  color: #fff;
+}
+.btn.secondary {
+  border: 1.5px solid #1f3a73;
+  color: #1f3a73;
+}
+.skeleton {
+  height: 10px;
+  border-radius: 5px;
+  background: #e9ecf0;
+  margin-top: 9px;
+}

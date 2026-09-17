@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Store screenshot 4: company website</title>
+  <link rel="stylesheet" href="/store/scenes/frame.css" />
+  <style>
+    .content { background: #fbfbfd; }
+    .nav { display: flex; align-items: center; gap: 28px; padding: 16px 40px; font-size: 14px; font-weight: 500; color: #3c4653; }
+    .nav .mark { display: flex; align-items: center; gap: 9px; margin-right: 12px; font-size: 17px; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
+    .nav .mark i { width: 24px; height: 24px; border-radius: 7px; background: conic-gradient(from 200deg, #6366f1, #22d3ee, #6366f1); }
+    .nav .cta { margin-left: auto; padding: 8px 16px; border-radius: 8px; background: #111827; color: #fff; font-weight: 600; }
+    .hero { display: grid; grid-template-columns: 1fr 340px; gap: 30px; align-items: center; padding: 26px 40px 0; }
+    .hero h2 { margin: 0; font-size: 38px; line-height: 1.08; font-weight: 800; letter-spacing: -0.03em; color: #111827; }
+    .hero p { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: #4b5563; max-width: 440px; }
+    .hero .btns { display: flex; gap: 10px; margin-top: 20px; }
+    .hero .btns .btn { border-radius: 8px; }
+    .hero .btns .primary { background: #4f46e5; }
+    .hero .btns .secondary { border-color: #d1d5db; color: #111827; }
+    .art { height: 300px; border-radius: 18px; background:
+        radial-gradient(180px 140px at 30% 30%, rgba(255,255,255,0.55), transparent 70%),
+        linear-gradient(145deg, #c7d2fe, #6366f1 55%, #0ea5e9); position: relative; overflow: hidden; }
+    .art::before, .art::after { content: ''; position: absolute; border-radius: 50%; background: rgba(255,255,255,0.22); }
+    .art::before { width: 220px; height: 220px; right: -60px; bottom: -70px; }
+    .art::after { width: 120px; height: 120px; left: 30px; top: 150px; }
+    /* Keep the floating box inside the mock window (it is fixed to the viewport by design). */
+    .indsc-float { right: 68px !important; bottom: 42px !important; }
+  </style>
+</head>
+<body>
+  <div class="band">
+    <h1>Works on <em>company websites</em> too — homepage and careers pages.</h1>
+    <p>A small card appears bottom-right. Hide it for now, on that site, or everywhere — and undo it from the popup.</p>
+  </div>
+  <div class="brand"><img src="/src/assets/icons/icon-128.png" alt="" />IND Sponsor Check</div>
+
+  <div class="window">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">nimbusrobotics.nl/careers</div>
+      <div class="ext"></div>
+    </div>
+    <div class="content">
+      <div class="nav">
+        <div class="mark"><i></i>Nimbus Robotics</div>
+        <span>Products</span><span>Solutions</span><span>Company</span><span>Careers</span>
+        <span class="cta">Book a demo</span>
+      </div>
+      <div class="hero">
+        <div>
+          <h2>Autonomous logistics for the warehouses of tomorrow.</h2>
+          <p>We build the robots and the software that move goods through Europe's busiest fulfilment centres. Join a team of 220 in Eindhoven and Amsterdam.</p>
+          <div class="btns"><span class="btn primary">See open roles</span><span class="btn secondary">Life at Nimbus</span></div>
+        </div>
+        <div class="art"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { check, floatingBadge } from '/store/scenes/scene.js'
+    floatingBadge('Nimbus Robotics', 'nimbusrobotics.nl', check('sponsor', 'Nimbus Robotics', [{ name: 'Nimbus Robotics B.V.', kvk: '00000000' }]))
+  </script>
+</body>
+</html>

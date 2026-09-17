@@ -26,6 +26,28 @@ describe('website.getPageKind', () => {
   ])('%s -> %s', (url, expected) => {
     expect(website.getPageKind(url)).toBe(expected)
   })
+
+  const jobPosting = {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: 'Data engineer',
+    hiringOrganization: { '@type': 'Organization', name: 'Albert Heijn', logo: 'https://ah.nl/logo.png' },
+  }
+
+  it('accepts a subpage that carries a JobPosting with a hiring organization', () => {
+    expect(website.getPageKind('https://boards.greenhouse.io/ah/jobs/4321', ld(jobPosting))).toBe('job')
+    expect(website.getPageKind('https://www.freeday.ai/careers/backend-engineer', ld(jobPosting))).toBe('job')
+  })
+
+  it('still reports the homepage as a company page, JobPosting or not', () => {
+    expect(website.getPageKind('https://www.ah.nl/', ld(jobPosting))).toBe('company')
+  })
+
+  it('ignores a subpage without a hiring organization', () => {
+    expect(website.getPageKind('https://example.com/about', ld({ '@type': 'Organization', name: 'Example' }))).toBeNull()
+    expect(website.getPageKind('https://example.com/about', doc('<h1>About</h1>'))).toBeNull()
+    expect(website.getPageKind('chrome://extensions', ld(jobPosting))).toBeNull()
+  })
 })
 
 describe('adapter registry', () => {
@@ -72,6 +94,11 @@ describe('findOrganization', () => {
       }),
     )
     expect(org).toEqual({ name: 'Freeday', candidates: ['Freeday', 'Freeday AI'] })
+  })
+
+  it('reads a hiring organization that is only typed by its JobPosting key', () => {
+    const org = findOrganization(ld({ '@type': 'JobPosting', hiringOrganization: { name: 'Albert Heijn' } }), 'job')
+    expect(org).toEqual({ name: 'Albert Heijn', candidates: ['Albert Heijn'] })
   })
 
   it('prefers the hiring organization of a job posting', () => {
@@ -134,5 +161,20 @@ describe('website adapter target', () => {
 
   it('returns null when the page has no organization data', () => {
     expect(website.findCompanyTarget(doc('<p>hi</p>'), 'company')).toBeNull()
+  })
+
+  it('badges the hiring organization on a job page, not the board running it', () => {
+    const page = ld(
+      { '@type': 'Organization', '@id': 'https://boards.greenhouse.io/#organization', name: 'Greenhouse' },
+      { '@type': 'JobPosting', title: 'Data engineer', hiringOrganization: { '@type': 'Organization', legalName: 'Albert Heijn B.V.', name: 'Albert Heijn' } },
+    )
+    const t = website.findCompanyTarget(page, 'job')
+    expect(t?.name).toBe('Albert Heijn')
+    expect(t?.candidates).toEqual(['Albert Heijn B.V.', 'Albert Heijn'])
+    expect(t?.placement).toBe('floating')
+  })
+
+  it('returns null on a job page whose only organization is the site itself', () => {
+    expect(website.findCompanyTarget(ld({ '@type': 'Organization', name: 'Greenhouse' }), 'job')).toBeNull()
   })
 })

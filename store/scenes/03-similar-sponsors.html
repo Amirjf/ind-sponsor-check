@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Store screenshot 3: similar sponsors list</title>
+  <link rel="stylesheet" href="/store/scenes/frame.css" />
+  <style>
+    .content { background: #f4f5f7; }
+    .cover { height: 74px; background: linear-gradient(110deg, #0f766e, #14b8a6 60%, #99f6e4); }
+    .profile { margin: 0 24px; padding: 0 24px 18px; background: #fff; border: 1px solid #e3e6ea; border-top: 0; border-radius: 0 0 12px 12px; }
+    .profile .logo.lg { width: 72px; height: 72px; margin-top: -30px; border: 3px solid #fff; font-size: 30px; }
+    .profile h2 { margin: 10px 0 2px; font-size: 26px; font-weight: 700; letter-spacing: -0.015em; display: flex; align-items: center; }
+    .profile .desc { font-size: 14px; color: #3c4653; }
+    .profile .meta { font-size: 13px; color: #5c6675; margin-top: 4px; }
+    .profile .btns { display: flex; gap: 10px; margin-top: 14px; }
+    .tabs { display: flex; gap: 26px; margin: 18px 0 0; border-top: 1px solid #eef0f2; padding-top: 12px; font-size: 14px; font-weight: 600; color: #5c6675; }
+    .tabs span:first-child { color: #1f3a73; box-shadow: 0 2px 0 #1f3a73; }
+    .posts { margin: 14px 24px 0; padding: 16px 20px; background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <div class="band">
+    <h1>Similar name? <em>See every matching sponsor.</em></h1>
+    <p>The amber badge lists the register entries that look like this company, with their KVK numbers.</p>
+  </div>
+  <div class="brand"><img src="/src/assets/icons/icon-128.png" alt="" />IND Sponsor Check</div>
+
+  <div class="window">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">linkedin.com/company/bird</div>
+      <div class="ext"></div>
+    </div>
+    <div class="content">
+      <div class="cover"></div>
+      <div class="profile">
+        <div class="logo lg" style="background:#0f766e">B</div>
+        <h2 id="company">Bird</h2>
+        <div class="desc">Communication platform for businesses · Amsterdam, North Holland</div>
+        <div class="meta">Software Development · 501–1,000 employees · 48,120 followers</div>
+        <div class="btns"><span class="btn primary">Follow</span><span class="btn secondary">Visit website</span></div>
+        <div class="tabs"><span>Home</span><span>About</span><span>Posts</span><span>Jobs</span><span>People</span></div>
+      </div>
+      <div class="posts">
+        <div class="skeleton" style="width:40%; margin-top:0"></div>
+        <div class="skeleton" style="width:95%"></div>
+        <div class="skeleton" style="width:88%"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { check, inlineBadge } from '/store/scenes/scene.js'
+    const badge = inlineBadge(document.getElementById('company'), check('likely', 'Bird', [
+      { name: 'Bird Control Group B.V.', kvk: '58351701' },
+      { name: 'BIRD Recruitment B.V.', kvk: '57390533' },
+      { name: 'Bird Rides Europe B.V.', kvk: '70872120' },
+    ]))
+    // Open the list the way a user would.
+    badge.click()
+  </script>
+</body>
+</html>

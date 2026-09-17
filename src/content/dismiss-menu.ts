@@ -10,14 +10,22 @@ interface DismissMenu {
   dispose: () => void
 }
 
+/** Gap between the button and its menu, and the minimum distance from the viewport edges. */
+const MENU_GAP = 8
+const MENU_MARGIN = 12
+
 /**
  * The floating box's close control: a × that opens a three-item menu instead of
  * dismissing straight away, so "stop showing this" can mean this page, this
  * site, or all company websites.
  *
- * The menu is nested in the wrapper rather than in <body> (unlike the
- * similar-sponsors menu): the floating box is our own element, fixed at the
- * top of the stacking order, so nothing on the host page can clip it.
+ * The menu stays inside the wrapper — keeping it a descendant is what lets the
+ * compact box treat a pointer on the menu as a pointer on the box, so it does
+ * not collapse under its own dropdown — but it is `position: fixed` and placed
+ * from the button's rect. The compact layout clips its sliding panel with
+ * `overflow: hidden`, and an absolutely positioned menu was clipped away with
+ * it; a fixed one is laid out against the viewport, which no ancestor's
+ * overflow can reach.
  */
 export function createDismissMenu(host: string, onChoose: (choice: DismissChoice) => void): DismissMenu {
   const element = document.createElement('div')
@@ -59,11 +67,33 @@ export function createDismissMenu(host: string, onChoose: (choice: DismissChoice
   note.textContent = 'Job badges on LinkedIn and Indeed keep working. Undo from the extension popup.'
   menu.appendChild(note)
 
+  /** Above the button and right-aligned with it — the box lives in the bottom-right corner — unless the space is not there. */
+  const position = () => {
+    const r = button.getBoundingClientRect()
+    const vw = document.documentElement.clientWidth || window.innerWidth
+    const vh = document.documentElement.clientHeight || window.innerHeight
+    const mw = menu.offsetWidth
+    const mh = menu.offsetHeight
+    const spaceAbove = r.top - MENU_GAP - MENU_MARGIN
+    const spaceBelow = vh - r.bottom - MENU_GAP - MENU_MARGIN
+    const up = mh <= spaceAbove || spaceAbove > spaceBelow
+    menu.style.left = `${Math.round(Math.max(MENU_MARGIN, Math.min(r.right - mw, vw - mw - MENU_MARGIN)))}px`
+    if (up) {
+      menu.style.top = 'auto'
+      menu.style.bottom = `${Math.round(vh - r.top + MENU_GAP)}px`
+    } else {
+      menu.style.bottom = 'auto'
+      menu.style.top = `${Math.round(r.bottom + MENU_GAP)}px`
+    }
+  }
+
   const isOpen = () => !menu.hidden
   const setOpen = (open: boolean) => {
     menu.hidden = !open
     button.setAttribute('aria-expanded', String(open))
     element.classList.toggle(`${DISMISS_CLASS}--open`, open)
+    // Measuring only works once it is out of `hidden`, so place it after.
+    if (open) position()
   }
 
   button.addEventListener('click', () => setOpen(!isOpen()))
@@ -81,8 +111,13 @@ export function createDismissMenu(host: string, onChoose: (choice: DismissChoice
       button.focus()
     }
   }
+  const onViewportChange = () => {
+    if (isOpen()) position()
+  }
   document.addEventListener('click', onDocClick)
   document.addEventListener('keydown', onDocKey)
+  window.addEventListener('scroll', onViewportChange, { capture: true, passive: true })
+  window.addEventListener('resize', onViewportChange, { passive: true })
 
   element.append(button, menu)
   return {
@@ -90,6 +125,8 @@ export function createDismissMenu(host: string, onChoose: (choice: DismissChoice
     dispose: () => {
       document.removeEventListener('click', onDocClick)
       document.removeEventListener('keydown', onDocKey)
+      window.removeEventListener('scroll', onViewportChange, { capture: true })
+      window.removeEventListener('resize', onViewportChange)
     },
   }
 }

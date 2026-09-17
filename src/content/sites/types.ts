@@ -21,6 +21,7 @@ export interface SiteAdapter {
   id: string
   /** Tested against `location.hostname`. */
   hosts: RegExp
-  getPageKind(url: string): PageKind | null
+  /** `root` is the live document; adapters that need the page's markup (JSON-LD) to tell job pages apart read it. */
+  getPageKind(url: string, root?: ParentNode): PageKind | null
   findCompanyTarget(root: ParentNode, kind: PageKind): CompanyTarget | null
 }

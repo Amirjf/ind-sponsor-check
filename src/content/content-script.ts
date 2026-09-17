@@ -134,7 +134,7 @@ async function lookup(names: readonly string[]): Promise<CheckResponse> {
 
 async function scan() {
   if (stopped) return
-  const kind = site?.getPageKind(location.href) ?? null
+  const kind = site?.getPageKind(location.href, document) ?? null
   if (!site || !kind) {
     removeStaleBadges()
     return

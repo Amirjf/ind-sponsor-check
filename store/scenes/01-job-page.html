@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Store screenshot 1: job page</title>
+  <link rel="stylesheet" href="/store/scenes/frame.css" />
+  <style>
+    .jobs { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+    .list { border-right: 1px solid #e6e8eb; overflow: hidden; }
+    .list .top { padding: 11px 16px; font-size: 13px; color: #5c6675; border-bottom: 1px solid #e6e8eb; }
+    .list .top b { color: #1f2328; font-weight: 600; }
+    .job { display: flex; gap: 12px; padding: 13px 16px; border-bottom: 1px solid #eef0f2; }
+    .job.active { background: #eef4fb; box-shadow: inset 3px 0 0 #1f3a73; }
+    .job h3 { margin: 0 0 1px; font-size: 14px; font-weight: 600; color: #1f3a73; line-height: 1.3; }
+    .job .name { font-size: 13px; color: #1f2328; }
+    .job .meta { font-size: 12px; color: #5c6675; }
+    .pane { padding: 22px 28px 0; }
+    .head { display: flex; align-items: center; gap: 12px; }
+    .pane h2 { margin: 12px 0 5px; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+    .pane .meta { font-size: 14px; color: #5c6675; }
+    .pane .meta b { color: #0d7b35; font-weight: 600; }
+    .pills { margin: 14px 0 0; }
+    .btns { display: flex; gap: 10px; margin: 16px 0 20px; }
+    .about h4 { margin: 0 0 6px; font-size: 15px; }
+    .about p { margin: 0; font-size: 13.5px; color: #3c4653; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="band">
+    <h1>Know if a company can <em>sponsor your visa</em> — before you apply.</h1>
+    <p>Open any job on LinkedIn or Indeed. The badge next to the company name gives you the answer.</p>
+  </div>
+  <div class="brand"><img src="/src/assets/icons/icon-128.png" alt="" />IND Sponsor Check</div>
+
+  <div class="window">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">linkedin.com/jobs/search/?location=Netherlands</div>
+      <div class="ext"></div>
+    </div>
+    <div class="content">
+      <div class="jobs">
+        <div class="list">
+          <div class="top"><b>128 results</b> · Netherlands</div>
+          <div class="job active">
+            <div class="logo" style="background:#0a7d4f">A</div>
+            <div><h3>Senior Backend Engineer</h3><div class="name">Adyen</div><div class="meta">Amsterdam (Hybrid) · 2 days ago</div></div>
+          </div>
+          <div class="job">
+            <div class="logo" style="background:#c2410c">P</div>
+            <div><h3>Data Scientist</h3><div class="name">Picnic</div><div class="meta">Amsterdam (On-site) · 3 days ago</div></div>
+          </div>
+          <div class="job">
+            <div class="logo" style="background:#1d4ed8">AS</div>
+            <div><h3>Software Design Engineer</h3><div class="name">ASML</div><div class="meta">Veldhoven (On-site) · 3 days ago</div></div>
+          </div>
+          <div class="job">
+            <div class="logo" style="background:#7c3aed">M</div>
+            <div><h3>Product Designer</h3><div class="name">Mollie</div><div class="meta">Amsterdam (Hybrid) · 5 days ago</div></div>
+          </div>
+          <div class="job">
+            <div class="logo" style="background:#b91c1c">T</div>
+            <div><h3>Machine Learning Engineer</h3><div class="name">TomTom</div><div class="meta">Amsterdam (Hybrid) · 1 week ago</div></div>
+          </div>
+        </div>
+        <div class="pane">
+          <div class="head">
+            <div class="logo lg" style="background:#0a7d4f">A</div>
+            <div class="co" id="company">Adyen</div>
+          </div>
+          <h2>Senior Backend Engineer</h2>
+          <div class="meta">Amsterdam, North Holland, Netherlands · <b>2 days ago</b> · 41 applicants</div>
+          <div class="pills"><span class="pill">Hybrid</span><span class="pill">Full-time</span><span class="pill">Mid-Senior level</span></div>
+          <div class="btns"><span class="btn primary">Apply</span><span class="btn secondary">Save</span></div>
+          <div class="about">
+            <h4>About the job</h4>
+            <p>We are looking for a Senior Backend Engineer to join our Payments Platform team in Amsterdam. You will design and build the services that process payments for some of the world's largest merchants, working in Java and Kotlin on a high-volume, globally distributed system.</p>
+            <div class="skeleton" style="width:92%"></div>
+            <div class="skeleton" style="width:78%"></div>
+            <div class="skeleton" style="width:85%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { check, inlineBadge } from '/store/scenes/scene.js'
+    inlineBadge(document.getElementById('company'), check('sponsor', 'Adyen', [
+      { name: 'Adyen N.V.', kvk: '34259528' },
+      { name: 'Adyen Netherlands B.V.', kvk: '98924397' },
+    ]))
+  </script>
+</body>
+</html>

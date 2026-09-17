@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Store screenshot 2: the three badge states</title>
+  <link rel="stylesheet" href="/store/scenes/frame.css" />
+  <style>
+    .content { background: #f4f5f7; padding: 18px 24px; }
+    .rows { display: grid; gap: 12px; }
+    .row-card { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 16px 20px; background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; }
+    .row-card h3 { margin: 0 0 3px; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+    .row-card .meta { font-size: 13px; color: #5c6675; margin-top: 3px; }
+    .why { max-width: 250px; font-size: 13px; line-height: 1.4; color: #3c4653; padding-left: 16px; border-left: 3px solid var(--c); }
+    .why b { display: block; color: var(--c); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="band">
+    <h1>Green, amber or red. <em>One glance</em> tells you.</h1>
+    <p>Every answer comes from the IND public register of recognised sponsors, checked locally in your browser.</p>
+  </div>
+  <div class="brand"><img src="/src/assets/icons/icon-128.png" alt="" />IND Sponsor Check</div>
+
+  <div class="window">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">linkedin.com/jobs/search/?location=Netherlands</div>
+      <div class="ext"></div>
+    </div>
+    <div class="content">
+      <div class="rows">
+        <div class="row-card" style="--c:#0d7b35">
+          <div class="logo lg" style="background:#0a7d4f">A</div>
+          <div>
+            <h3>Senior Backend Engineer</h3>
+            <div class="co" id="c1">Adyen</div>
+            <div class="meta">Amsterdam (Hybrid) · 2 days ago</div>
+          </div>
+          <div class="why"><b>Recognised sponsor</b>The company is listed in the register. Click the badge to open it.</div>
+        </div>
+        <div class="row-card" style="--c:#b8860b">
+          <div class="logo lg" style="background:#0f766e">B</div>
+          <div>
+            <h3>Customer Success Manager</h3>
+            <div class="co" id="c2">Bird</div>
+            <div class="meta">Amsterdam (On-site) · 4 days ago</div>
+          </div>
+          <div class="why"><b>Similar names found</b>Several register entries look like this company. Click to see the list.</div>
+        </div>
+        <div class="row-card" style="--c:#d32f2f">
+          <div class="logo lg" style="background:#475569">N</div>
+          <div>
+            <h3>Frontend Developer</h3>
+            <div class="co" id="c3">Northwind Studio</div>
+            <div class="meta">Rotterdam (On-site) · 1 week ago</div>
+          </div>
+          <div class="why"><b>Not in the register</b>No matching name. Worth asking before you spend time on the application.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { check, inlineBadge } from '/store/scenes/scene.js'
+    inlineBadge(document.getElementById('c1'), check('sponsor', 'Adyen', [{ name: 'Adyen N.V.', kvk: '34259528' }]))
+    inlineBadge(document.getElementById('c2'), check('likely', 'Bird', [
+      { name: 'Bird Control Group B.V.', kvk: '58351701' },
+      { name: 'BIRD Recruitment B.V.', kvk: '57390533' },
+      { name: 'Bird Rides Europe B.V.', kvk: '70872120' },
+    ]))
+    inlineBadge(document.getElementById('c3'), check('none', 'Northwind Studio'))
+  </script>
+</body>
+</html>

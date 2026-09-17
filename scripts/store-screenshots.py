@@ -1,94 +1,135 @@
 #!/usr/bin/env python3
-"""Derive both sets of screenshots from the full-size captures in store/screenshots/.
+"""Render the store and intro screenshots from the scenes in store/scenes/.
 
-Two outputs, one source:
+Each scene is a small mock page (a job board, a company profile, a company
+website, the popup) that runs the extension's real badge code from src/, with
+a headline band above it. Headless Chrome renders it at 1024x640 CSS px with a
+2x device scale factor; this script then scales the 2048x1280 capture to:
 
-- `store/screenshots/1280x800/` — the Chrome Web Store wants exactly 1280x800
-  (or 640x400), so each capture is scaled to fit and centred on a canvas
-  painted with the colour of its own top edge (the browser chrome), which reads
-  as one continuous image rather than as letterboxing.
-- `src/assets/screenshots/` — the copies the intro page imports and Vite ships
-  inside the extension. Scaled to 1600px wide to keep the package small.
+- `store/screenshots/1280x800/<scene>.png` — the exact size the Chrome Web
+  Store asks for, headline included.
+- `src/assets/screenshots/<name>.jpg` — the page area only (no headline, no
+  browser chrome) at 1600px wide, for the intro page that ships inside the
+  extension.
 
-Both are blurred in the regions listed in REDACT: names, faces and account
-activity that must not go on a public listing or into the shipped package.
-Coordinates are fractions of the source capture (0..1), so they survive both
-resizes — but re-check them whenever a capture is replaced.
+Nothing in the scenes is a real capture, so there is nothing to blur.
 
-Needs Pillow:  pip3 install Pillow
+Needs the Vite dev server (`npm run dev`) so the scenes can import
+src/content/badge.ts, and Pillow (`pip3 install Pillow`). Set CHROME to point
+at a different Chrome/Chromium binary.
 """
+import os
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.request
 from pathlib import Path
-from statistics import median
 
-from PIL import Image, ImageFilter
+from PIL import Image
 
-SRC = Path('store/screenshots')
-STORE_OUT = SRC / '1280x800'
-INTRO_OUT = Path('src/assets/screenshots')
+ROOT = Path(__file__).resolve().parent.parent
+SCENES = ROOT / 'store' / 'scenes'
+STORE_OUT = ROOT / 'store' / 'screenshots' / '1280x800'
+INTRO_OUT = ROOT / 'src' / 'assets' / 'screenshots'
+
+DEV_SERVER = os.environ.get('DEV_SERVER', 'http://localhost:5173')
+CHROME = os.environ.get('CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+
+# Scene page size and the scale factor Chrome renders it at.
+PAGE_W, PAGE_H, DPR = 1024, 640, 2
 STORE_W, STORE_H = 1280, 800
 INTRO_W = 1600
 
-# (x0, y0, x1, y1) as fractions of the source capture.
-REDACT = {
-    'company-website.jpg': [
-        (0.7070, 0.0058, 0.8242, 0.0684),  # signed-in account name + avatar
-        (0.1734, 0.6601, 0.8266, 0.8063),  # "How was <hotel>?" — past booking
-    ],
-    'linkedin-company-page.jpg': [
-        (0.7250, 0.0225, 0.9703, 0.2095),  # promoted card: first name + member photo
-        (0.0484, 0.4394, 0.3086, 0.4811),  # "<name> & 3 other connections work here"
-        (0.7797, 0.5606, 0.9625, 0.6137),  # "<name> follows this page"
-        (0.7797, 0.8310, 0.9625, 0.8840),  # "<name> & 3 others follow this page"
-    ],
-    'linkedin-job-page.jpg': [
-        (0.1117, 0.5775, 0.3125, 0.6096),  # "4 connections work here" + avatars
-        (0.4492, 0.9010, 0.7305, 0.9785),  # "People you can reach out to" faces + name
-    ],
+# The page area inside the mock browser window, in CSS px (see store/scenes/frame.css:
+# .window is inset 52px left/right, starts at 172px and ends 26px above the bottom;
+# its toolbar is 36px tall).
+PAGE_AREA = (52, 172 + 36, PAGE_W - 52, PAGE_H - 26)
+
+# Scenes that also feed the intro page, and the file name it imports.
+INTRO = {
+    '01-job-page': 'job-page.jpg',
+    '03-similar-sponsors': 'company-page.jpg',
+    '04-company-website': 'company-website.jpg',
 }
 
-BLUR_AT_1280 = 11  # radius, scaled with the image so both outputs blur equally hard
 
-
-def blur(img: Image.Image, regions, x0: float, y0: float, w: float, h: float) -> int:
-    """Blur each fractional region, mapped onto the box the capture occupies."""
-    radius = max(4, round(BLUR_AT_1280 * w / STORE_W))
-    for fx0, fy0, fx1, fy1 in regions:
-        box = (round(x0 + fx0 * w), round(y0 + fy0 * h),
-               round(x0 + fx1 * w), round(y0 + fy1 * h))
-        img.paste(img.crop(box).filter(ImageFilter.GaussianBlur(radius)), box)
-    return len(regions)
+def render(scene: str, out: Path) -> None:
+    """Screenshot one scene. Chrome writes the file after --timeout and then, with
+    the dev server's HMR socket still open, does not always exit on its own, so
+    it is stopped as soon as the file has stopped growing."""
+    url = f'{DEV_SERVER}/store/scenes/{scene}.html'
+    with tempfile.TemporaryDirectory() as profile:
+        proc = subprocess.Popen(
+            [
+                CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars',
+                '--no-first-run', '--no-default-browser-check', f'--user-data-dir={profile}',
+                f'--window-size={PAGE_W},{PAGE_H}', f'--force-device-scale-factor={DPR}',
+                # capture after a fixed delay: module imports, React and the popup's debounce need a moment
+                '--timeout=4000',
+                f'--screenshot={out}', url,
+            ],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        try:
+            deadline = time.time() + 60
+            size = -1
+            while time.time() < deadline:
+                time.sleep(0.5)
+                if proc.poll() is not None:
+                    break
+                if out.exists():
+                    if out.stat().st_size == size:
+                        break
+                    size = out.stat().st_size
+            else:
+                sys.exit(f'{scene}: Chrome produced no screenshot within 60s')
+        finally:
+            if proc.poll() is None:
+                proc.terminate()
+                try:
+                    proc.wait(5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+    if not out.exists():
+        sys.exit(f'{scene}: Chrome exited without writing a screenshot')
 
 
 def main() -> None:
+    try:
+        urllib.request.urlopen(f'{DEV_SERVER}/store/scenes/frame.css', timeout=3)
+    except Exception as e:  # noqa: BLE001
+        sys.exit(f'Dev server not reachable at {DEV_SERVER} ({e}). Run `npm run dev` first.')
+    if not Path(CHROME).exists():
+        sys.exit(f'Chrome not found at {CHROME}; set CHROME=/path/to/chrome')
+
     STORE_OUT.mkdir(parents=True, exist_ok=True)
     INTRO_OUT.mkdir(parents=True, exist_ok=True)
+    only = set(sys.argv[1:])
 
-    for src in sorted(SRC.glob('*.jpg')):
-        im = Image.open(src).convert('RGB')
-        w, h = im.size
-        regions = REDACT.get(src.name, [])
-        if not regions:
-            print(f'{src.name}: no redaction regions listed — check it by eye')
+    for page in sorted(SCENES.glob('*.html')):
+        scene = page.stem
+        if only and scene not in only:
+            continue
+        with tempfile.TemporaryDirectory() as tmp:
+            raw = Path(tmp) / 'raw.png'
+            render(scene, raw)
+            im = Image.open(raw).convert('RGB')
+        if im.size != (PAGE_W * DPR, PAGE_H * DPR):
+            sys.exit(f'{scene}: unexpected capture size {im.size}')
 
-        # Store: fit onto the fixed canvas, padded with the top-edge colour.
-        scale = min(STORE_W / w, STORE_H / h)
-        scaled = im.resize((round(w * scale), round(h * scale)), Image.LANCZOS)
-        top = [im.getpixel((x, 1)) for x in range(0, w, 7)]
-        bg = tuple(int(median(c[i] for c in top)) for i in range(3))
-        canvas = Image.new('RGB', (STORE_W, STORE_H), bg)
-        ox, oy = (STORE_W - scaled.width) // 2, (STORE_H - scaled.height) // 2
-        canvas.paste(scaled, (ox, oy))
-        n = blur(canvas, regions, ox, oy, scaled.width, scaled.height)
-        canvas.save(STORE_OUT / src.name, 'JPEG', quality=86, optimize=True)
-        print(f'{STORE_OUT / src.name}  {STORE_W}x{STORE_H}  bg={bg}  {n} blurred')
+        store = im.resize((STORE_W, STORE_H), Image.LANCZOS)
+        store.save(STORE_OUT / f'{scene}.png', 'PNG', optimize=True)
+        print(f'{STORE_OUT / f"{scene}.png"}  {STORE_W}x{STORE_H}')
 
-        # Intro page: plain resize, same regions.
-        intro = im.resize((INTRO_W, round(h * INTRO_W / w)), Image.LANCZOS)
-        blur(intro, regions, 0, 0, intro.width, intro.height)
-        intro.save(INTRO_OUT / src.name, 'JPEG', quality=78, optimize=True)
-        print(f'{INTRO_OUT / src.name}  {intro.width}x{intro.height}  {n} blurred')
+        if scene in INTRO:
+            x0, y0, x1, y1 = (v * DPR for v in PAGE_AREA)
+            area = im.crop((x0, y0, x1, y1))
+            intro = area.resize((INTRO_W, round(area.height * INTRO_W / area.width)), Image.LANCZOS)
+            intro.save(INTRO_OUT / INTRO[scene], 'JPEG', quality=82, optimize=True)
+            print(f'{INTRO_OUT / INTRO[scene]}  {intro.width}x{intro.height}')
 
-    print('\nLook at every image before shipping: a capture that moved blurs the wrong pixels.')
+    print('\nOpen the images before shipping: a scene that overflowed its window is only visible by eye.')
 
 
 if __name__ == '__main__':

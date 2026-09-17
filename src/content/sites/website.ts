@@ -62,6 +62,8 @@ function toOrganization(node: JsonObject): Organization | null {
 
 interface Candidate {
   org: Organization
+  /** From a JobPosting's `hiringOrganization`: the employer, not whoever runs the page. */
+  hiring: boolean
   /** Lower is better. */
   rank: number
 }
@@ -80,7 +82,7 @@ function collect(value: Json, key: string | null, out: Candidate[]) {
     if (org) {
       const id = typeof value['@id'] === 'string' ? value['@id'] : ''
       const rank = isHiring ? 0 : /#organization$/i.test(id) ? 1 : 2
-      out.push({ org, rank })
+      out.push({ org, hiring: isHiring, rank })
     }
   }
   for (const [k, v] of Object.entries(value)) {
@@ -90,8 +92,12 @@ function collect(value: Json, key: string | null, out: Candidate[]) {
   }
 }
 
-/** The organization the page describes, or null when the page carries no JSON-LD organization. */
-export function findOrganization(root: ParentNode): Organization | null {
+/**
+ * The organization the page describes, or null when the page carries no JSON-LD organization.
+ * On a `job` page only a JobPosting's `hiringOrganization` counts: every other organization
+ * there belongs to the job board or ATS hosting the posting, not to the employer.
+ */
+export function findOrganization(root: ParentNode, kind: PageKind = 'company'): Organization | null {
   const found: Candidate[] = []
   for (const script of root.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json" i]')) {
     let data: Json
@@ -102,30 +108,38 @@ export function findOrganization(root: ParentNode): Organization | null {
     }
     collect(data, null, found)
   }
-  if (found.length === 0) return null
+  const pool = kind === 'job' ? found.filter((c) => c.hiring) : found
+  if (pool.length === 0) return null
   // Stable sort: document order breaks ties within a rank.
-  return found.sort((a, b) => a.rank - b.rank)[0].org
+  return pool.sort((a, b) => a.rank - b.rank)[0].org
 }
 
 /** "/" or a single locale segment ("/nl", "/en-us/"): the site root, where the JSON-LD describes the company itself. */
 const HOME_PATH = /^\/([a-z]{2}(-[a-z]{2})?\/?)?$/i
 
-/** Only the homepage: subpages often describe a product, article or partner page instead of the company. */
-export function getPageKind(url: string): PageKind | null {
+/**
+ * The homepage describes the company itself. Elsewhere only a JobPosting's `hiringOrganization`
+ * qualifies (a careers page on the company's own site, a Greenhouse or Lever board, ...): other
+ * subpages describe a product, article or partner page instead of the company.
+ */
+export function getPageKind(url: string, root?: ParentNode): PageKind | null {
+  let u: URL
   try {
-    const u = new URL(url)
-    return /^https?:$/.test(u.protocol) && HOME_PATH.test(u.pathname) ? 'company' : null
+    u = new URL(url)
   } catch {
     return null
   }
+  if (!/^https?:$/.test(u.protocol)) return null
+  if (HOME_PATH.test(u.pathname)) return 'company'
+  return root && findOrganization(root, 'job') ? 'job' : null
 }
 
 export const website: SiteAdapter = {
   id: 'website',
   hosts: /./,
   getPageKind,
-  findCompanyTarget(root) {
-    const org = findOrganization(root)
+  findCompanyTarget(root, kind) {
+    const org = findOrganization(root, kind)
     if (!org) return null
     const element = (root as Document).body ?? (root as Document).documentElement
     if (!element) return null

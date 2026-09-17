@@ -80,8 +80,8 @@ IND public register of recognised sponsors.
 
 ## Assets for the submission
 - 128x128 icon: `src/assets/icons/icon-128.png` (generated from `logo.png` by `npm run icons`)
-- Screenshots (1280x800, ready to upload): `store/screenshots/1280x800/`
-  — personal names and faces are blurred; regenerate with the script in the
-  README after replacing an original in `store/screenshots/`
+- Screenshots (1280x800 PNG, ready to upload, in order): `store/screenshots/1280x800/`
+  — rendered from the scenes in `store/scenes/` by `npm run shots` (see the
+  README); no real pages or people in them, nothing to blur
 - Package: `release/ind-sponsor-check-1.0.0.zip` (`npm run build && npm run zip`)
 - Optional 440x280 small promo tile — not made yet
