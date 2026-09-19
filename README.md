@@ -6,6 +6,26 @@ company pages, and a floating badge on company websites, telling you whether
 that company is in the IND
 [public register of recognised sponsors](https://ind.nl/en/public-register-recognised-sponsors/public-register-work).
 
+## What it looks like
+
+<table>
+  <tr>
+    <td width="50%"><img src="store/screenshots/1280x800/01-job-page.png" alt="A LinkedIn job page with a green 'IND recognised sponsor' badge next to the company name"></td>
+    <td width="50%"><img src="store/screenshots/1280x800/02-three-states.png" alt="Three job cards showing the green, amber and red badge states side by side"></td>
+  </tr>
+  <tr>
+    <td><img src="store/screenshots/1280x800/03-similar-sponsors.png" alt="A company page with the amber badge open, listing the similar register entries with their KVK numbers"></td>
+    <td><img src="store/screenshots/1280x800/04-company-website.png" alt="A company careers page with the floating sponsor badge card in the bottom-right corner"></td>
+  </tr>
+  <tr>
+    <td><img src="store/screenshots/1280x800/05-popup.png" alt="The extension popup with a manual company lookup and the register's last-refresh time"></td>
+    <td></td>
+  </tr>
+</table>
+
+The images are rendered mock pages, not captures of real accounts; see
+[Screenshots](#screenshots) for how they are produced and regenerated.
+
 ```
 src/
   background/   service worker: downloads + caches the register, answers lookups
